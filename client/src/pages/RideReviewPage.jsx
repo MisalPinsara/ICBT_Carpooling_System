@@ -6,6 +6,7 @@ import { api } from "../services/api";
 export function RideReviewPage(props) {
   const [ride, setRide] = useState(null);
   const [error, setError] = useState("");
+  const [publishing, setPublishing] = useState(false);
 
   useEffect(() => {
     const pendingRide = sessionStorage.getItem("pendingRideOffer");
@@ -21,7 +22,9 @@ export function RideReviewPage(props) {
   }, []);
 
   async function publish() {
+    if (publishing) return;
     setError("");
+    setPublishing(true);
     try {
       const payload = {
         origin: ride.origin,
@@ -31,13 +34,22 @@ export function RideReviewPage(props) {
         timeWindow: ride.timeWindow,
         availableSeats: Number(ride.availableSeats)
       };
-      const data = await api.createRide(payload);
+      await api.createRide(payload);
       sessionStorage.removeItem("pendingRideOffer");
-      setRide(data.offer);
-      props.setView("rideCreated");
+      sessionStorage.setItem("rideOfferFlash", "offer created successfully");
+      props.setView("createRide");
     } catch (err) {
       setError(err.message);
+      setPublishing(false);
     }
+  }
+
+  if (publishing) {
+    return (
+      <AppShell {...props}>
+        <LoadingWindow text="publishing offer" />
+      </AppShell>
+    );
   }
 
   if (!ride) {
@@ -50,7 +62,6 @@ export function RideReviewPage(props) {
 
   return (
     <AppShell {...props}>
-      <h1 className="page-title">Review Ride Offer</h1>
       <section className="intro compact-intro"><h2>Review before publishing</h2></section>
       <section className="panel review-panel">
         <div className="review-route">
