@@ -1,7 +1,13 @@
+const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || "").replace(/\/$/, "");
+
+function apiUrl(path) {
+  return `${API_BASE_URL}${path}`;
+}
+
 export const api = {
   async request(path, options = {}) {
     const token = localStorage.getItem("icbtToken");
-    const response = await fetch(path, {
+    const response = await fetch(apiUrl(path), {
       ...options,
       headers: {
         "Content-Type": "application/json",
