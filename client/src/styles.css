@@ -204,7 +204,18 @@
     @apply shrink-0 text-sm not-italic text-[#98a6ba] sm:text-[15px];
   }
 
-  .validation-message {
+  .password-toggle {
+    @apply grid h-8 w-8 shrink-0 place-items-center rounded-md text-[#8090a6] transition hover:bg-blue-50 hover:text-brand-blue focus:outline-none focus-visible:shadow-[0_0_0_3px_rgba(47,104,232,0.14)];
+  }
+
+  .input-wrap.error .password-toggle {
+    @apply text-red-500 hover:bg-red-50 hover:text-red-600;
+  }
+
+  .validation-message,
+  .field > .validation-message,
+  .login-card .field > .validation-message,
+  .login-error .validation-message {
     @apply font-sans text-[11px] font-normal leading-[12px] text-red-600;
     font-size: 11px;
     font-weight: 400;
@@ -415,7 +426,7 @@
   }
 
   .offers-title-row {
-    @apply mb-4 flex flex-col items-start gap-3 sm:flex-row sm:items-start sm:justify-between;
+    @apply mb-4 flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between;
   }
 
   .offers-title-row .compact-intro {
@@ -449,15 +460,38 @@
   }
 
   .empty-offers {
-    @apply p-5;
+    @apply grid min-h-[320px] place-items-center p-5 text-center;
   }
 
   .empty-offers h3 {
-    @apply mb-1 mt-0 text-lg font-normal;
+    @apply m-0 text-sm font-normal text-brand-muted;
   }
 
+  .empty-page-panel {
+    @apply grid min-h-[420px] place-items-center p-5 text-center;
+  }
+
+  .empty-page-panel p {
+    @apply m-0 text-sm font-normal text-brand-muted;
+  }
   .modal-backdrop {
     @apply fixed inset-0 z-50 grid place-items-center bg-slate-950/45 px-3 py-6;
+  }
+
+  .success-modal-backdrop {
+    @apply backdrop-blur-sm;
+  }
+
+  .success-account-modal {
+    @apply grid w-full max-w-[430px] justify-items-center gap-6 rounded-lg border border-brand-line bg-white p-6 text-center shadow-xl sm:p-8;
+  }
+
+  .success-account-modal h2 {
+    @apply m-0 text-lg font-normal leading-snug text-brand-ink sm:text-xl;
+  }
+
+  .success-account-modal .primary-button {
+    @apply w-full max-w-[260px];
   }
 
   .modal-panel {

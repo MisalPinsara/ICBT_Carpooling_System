@@ -1,11 +1,18 @@
 import { MongoClient } from "mongodb";
+import dns from "node:dns";
 import { config } from "./config.js";
 
 let client;
 let db;
+let dnsConfigured = false;
 
 export async function connectToDatabase() {
   if (db) return db;
+
+  if (!dnsConfigured && config.mongoDnsServers.length && config.mongoUri.startsWith("mongodb+srv://")) {
+    dns.setServers(config.mongoDnsServers);
+    dnsConfigured = true;
+  }
 
   client = new MongoClient(config.mongoUri);
   await client.connect();

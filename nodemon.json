@@ -1,7 +1,0 @@
-{
-  "watch": ["server"],
-  "ext": "js,json",
-  "ignore": ["node_modules", "dist", "src", ".codex_pdf_pages"],
-  "delay": "500",
-  "exec": "node server/index.js"
-}

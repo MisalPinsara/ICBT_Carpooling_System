@@ -9,7 +9,7 @@ const routeLabels = {
   rideCreated: "My Ride Offers / Published",
   editProfile: "Profile / Edit",
   profile: "Profile",
-  rides: "My Rides",
+  rides: "My Ride Offers",
   requests: "Requests",
   find: "Find a Ride",
   messages: "Messages",
@@ -23,9 +23,7 @@ function isActiveNav(view, key) {
 }
 
 function handleNavClick(key, setView) {
-  if (key === "createRide") setView("createRide");
-  if (key === "profile") setView("profile");
-  if (key === "dashboard") setView("dashboard");
+  setView(key);
 }
 
 function getBackView(view, backViewOverride) {
@@ -52,7 +50,7 @@ export function AppShell({ user, view, setView, logout, detailBackView, children
       ]
     : [
         ["dashboard", Home, "Dashboard"],
-        ["rides", Car, "My Rides"],
+        ["rides", Car, "My Ride Offers"],
         ["requests", UsersRound, "Requests"],
         ["find", Search, "Find a Ride"],
         ["messages", MessageSquare, "Messages"],

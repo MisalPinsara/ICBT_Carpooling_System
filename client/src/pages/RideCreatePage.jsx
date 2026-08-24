@@ -72,7 +72,7 @@ export function RideCreatePage(props) {
         timeWindow: ride.timeWindow || "",
         availableSeats: ride.availableSeats || ""
       });
-      setOffers(offerData.offers || []);
+      setOffers(Array.isArray(offerData.offers) ? offerData.offers : []);
     });
   }, []);
 
@@ -109,7 +109,6 @@ export function RideCreatePage(props) {
       {offers.length === 0 ? (
         <section className="panel empty-offers">
           <h3>No offers</h3>
-          <p>You have not created any ride offers yet.</p>
         </section>
       ) : (
         <section className="offers-list">

@@ -9,6 +9,7 @@ import { RideCreatedPage } from "./pages/RideCreatedPage";
 import { RideDetailsPage } from "./pages/RideDetailsPage";
 import { ProfilePage } from "./pages/ProfilePage";
 import { EditProfilePage } from "./pages/EditProfilePage";
+import { EmptyStatePage } from "./pages/EmptyStatePage";
 import { LoadingWindow } from "./components/LoadingWindow";
 import { api } from "./services/api";
 
@@ -39,7 +40,7 @@ export function App() {
     api.me()
       .then(({ user, profile }) => {
         setAuth({ user, profile, loading: false });
-        navigate(user.role === "Driver" ? "dashboard" : "profile");
+        navigate("dashboard");
       })
       .catch(() => {
         localStorage.removeItem("icbtToken");
@@ -50,7 +51,7 @@ export function App() {
   const handleAuth = ({ token, user, profile }) => {
     localStorage.setItem("icbtToken", token);
     setAuth({ user, profile, loading: false });
-    navigate(user.role === "Driver" ? "dashboard" : "profile");
+    navigate("dashboard");
   };
 
   const logout = () => {
@@ -95,5 +96,9 @@ export function App() {
   if (view === "rideCreated") return <RideCreatedPage {...sharedProps} />;
   if (view === "editProfile") return <EditProfilePage {...sharedProps} />;
   if (view === "profile") return <ProfilePage {...sharedProps} />;
+
+  const emptyViews = ["rides", "requests", "find", "messages", "journeys", "passengers"];
+  if (emptyViews.includes(view)) return <EmptyStatePage {...sharedProps} />;
+
   return <DashboardPage {...sharedProps} />;
 }

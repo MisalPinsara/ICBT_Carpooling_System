@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { Eye } from "lucide-react";
 import { BrandPanel } from "../components/BrandPanel";
 import { Field } from "../components/Field";
 import { api } from "../services/api";
@@ -9,6 +8,7 @@ export function RegisterPage({ onLogin, onAuthed }) {
   const [form, setForm] = useState({ firstName: "", lastName: "", email: "", phoneNumber: "", password: "", confirmPassword: "", role: "Passenger" });
   const [error, setError] = useState("");
   const [fieldErrors, setFieldErrors] = useState({});
+  const [pendingAuth, setPendingAuth] = useState(null);
 
   const update = (key, value) => {
     setForm((current) => ({ ...current, [key]: value }));
@@ -24,7 +24,7 @@ export function RegisterPage({ onLogin, onAuthed }) {
     if (hasErrors(validation)) return;
 
     try {
-      onAuthed(await api.register(form));
+      setPendingAuth(await api.register(form));
     } catch (err) {
       setError(err.message);
       setFieldErrors(err.details || {});
@@ -42,13 +42,21 @@ export function RegisterPage({ onLogin, onAuthed }) {
           <Field label="Last Name" value={form.lastName} placeholder="Enter your last name" error={fieldErrors.lastName} onChange={(value) => update("lastName", value)} />
           <Field label="Email" value={form.email} placeholder="Enter your email" error={fieldErrors.email} onChange={(value) => update("email", value)} />
           <Field label="Phone Number" value={form.phoneNumber} placeholder="Enter your phone number" error={fieldErrors.phoneNumber} onChange={(value) => update("phoneNumber", value)} />
-          <Field label="Password" icon={<Eye size={18} />} type="password" value={form.password} placeholder="Create a password" error={fieldErrors.password} onChange={(value) => update("password", value)} iconRight />
-          <Field label="Confirm Password" icon={<Eye size={18} />} type="password" value={form.confirmPassword} placeholder="Confirm your password" error={fieldErrors.confirmPassword} onChange={(value) => update("confirmPassword", value)} iconRight />
+          <Field label="Password" type="password" value={form.password} placeholder="Create a password" error={fieldErrors.password} onChange={(value) => update("password", value)} />
+          <Field label="Confirm Password" type="password" value={form.confirmPassword} placeholder="Confirm your password" error={fieldErrors.confirmPassword} onChange={(value) => update("confirmPassword", value)} />
           {error && <p className="form-error">{error}</p>}
           <button className="primary-button" type="submit">Create Account</button>
           <p className="switch-copy">Already have an account?</p>
           <button className="link-button strong login-create-link" type="button" onClick={onLogin}>Login</button>
         </form>
+        {pendingAuth && (
+          <div className="modal-backdrop success-modal-backdrop" role="presentation">
+            <section className="success-account-modal" role="dialog" aria-modal="true" aria-labelledby="account-created-title">
+              <h2 id="account-created-title">successfully created your ICBT Carpooling account</h2>
+              <button className="primary-button" type="button" onClick={() => onAuthed(pendingAuth)}>Continue to dashboard</button>
+            </section>
+          </div>
+        )}
       </section>
     </main>
   );

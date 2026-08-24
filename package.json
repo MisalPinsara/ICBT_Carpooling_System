@@ -4,13 +4,13 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "concurrently --kill-others-on-fail \"npm run server\" \"npm run client\"",
-    "client": "vite --host 127.0.0.1 --port 5173 --strictPort",
+    "client": "cd client && vite --host 127.0.0.1 --port 5173 --strictPort",
     "server": "nodemon",
     "start": "node server/index.js",
     "seed": "node server/seed.js",
     "test": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --runInBand",
-    "build": "vite build"
+    "build": "cd client && vite build",
+    "dev": "concurrently \"npm run server\" \"npm run client\""
   },
   "dependencies": {
     "@vitejs/plugin-react": "^5.0.0",
