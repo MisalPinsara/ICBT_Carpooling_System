@@ -21,6 +21,13 @@ jobs:
       run:
         working-directory: server
 
+    env:
+      NODE_ENV: test
+      MONGODB_URI: mongodb://127.0.0.1:27017/icbt_carpooling_test
+      MONGODB_DB: icbt_carpooling_test
+      JWT_SECRET: github-actions-test-secret
+      CLIENT_ORIGIN: http://127.0.0.1:5173
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
