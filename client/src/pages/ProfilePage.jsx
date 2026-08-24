@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AppShell } from "../components/AppShell";
 import { Field } from "../components/Field";
 import { Info } from "../components/Info";
@@ -18,6 +18,13 @@ export function ProfilePage(props) {
   });
   const [error, setError] = useState("");
   const [fieldErrors, setFieldErrors] = useState({});
+  const [flash, setFlash] = useState("");
+
+  useEffect(() => {
+    if (!flash) return undefined;
+    const timeoutId = window.setTimeout(() => setFlash(""), 4200);
+    return () => window.clearTimeout(timeoutId);
+  }, [flash]);
 
   const update = (key, value) => {
     setForm((current) => ({ ...current, [key]: value }));
@@ -36,6 +43,7 @@ export function ProfilePage(props) {
       const data = await api.updateProfile(form);
       props.updateAuth(data);
       setShowEdit(false);
+      setFlash("profile updated successfully");
     } catch (err) {
       setError(err.message);
       setFieldErrors(err.details || {});
@@ -44,6 +52,7 @@ export function ProfilePage(props) {
 
   return (
     <AppShell {...props}>
+      {flash && <div className="top-alert" role="status">{flash}</div>}
       <section className="intro compact-intro">
         <h2>My Profile</h2>
         <p>View your account and personal information.</p>
