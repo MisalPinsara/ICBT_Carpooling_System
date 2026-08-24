@@ -4,8 +4,8 @@ import { connectToDatabase } from "./db.js";
 
 await waitForDatabase();
 
-const server = createApp().listen(config.port, () => {
-  console.log(`ICBT Carpool API running on http://127.0.0.1:${config.port}`);
+const server = createApp().listen(config.port, "0.0.0.0", () => {
+  console.log(`ICBT Carpool API running on ${config.port}`);
 });
 
 server.on("error", (error) => {
