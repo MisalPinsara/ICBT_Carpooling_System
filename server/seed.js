@@ -16,7 +16,6 @@ async function seed() {
       name: "Kasun Fernando",
       email: "kasun@icbt.lk",
       passwordHash: await hashPassword("Password123"),
-      role: "Driver",
       createdAt: now
       },
       $setOnInsert: { _id: kasunId }
@@ -30,7 +29,6 @@ async function seed() {
       name: "Nethmi Perera",
       email: "nethmi@icbt.lk",
       passwordHash: await hashPassword("Password123"),
-      role: "Passenger",
       createdAt: now
       },
       $setOnInsert: { _id: nethmiId }

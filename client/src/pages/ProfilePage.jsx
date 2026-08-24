@@ -53,7 +53,7 @@ export function ProfilePage(props) {
           <div className="avatar-large">{initials}</div>
           <div>
             <h2>{user.name}</h2>
-            <p>{user.role} • {profile.accountType}</p>
+            <p>{profile.accountType}</p>
             <div className="profile-actions">
               <button className="primary-button small" type="button" onClick={() => setShowEdit(true)}>Edit Profile</button>
               <button className="secondary-button small" type="button">Change Password</button>
@@ -67,7 +67,6 @@ export function ProfilePage(props) {
           <Info label="Email" value={user.email} />
           <Info label="Phone Number" value={profile.phoneNumber} />
           <Info label="Student / Staff ID" value={profile.studentStaffId} />
-          <Info label="Role" value={user.role} />
           <Info label="Home Route" value={profile.homeRoute} wide />
         </div>
       </section>
