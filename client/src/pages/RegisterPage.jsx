@@ -5,7 +5,7 @@ import { api } from "../services/api";
 import { hasErrors, validateRegisterForm } from "../utils/validation";
 
 export function RegisterPage({ onLogin, onAuthed }) {
-  const [form, setForm] = useState({ firstName: "", lastName: "", email: "", phoneNumber: "", password: "", confirmPassword: "", role: "Passenger" });
+  const [form, setForm] = useState({ firstName: "", lastName: "", email: "", phoneNumber: "", password: "", confirmPassword: "" });
   const [error, setError] = useState("");
   const [fieldErrors, setFieldErrors] = useState({});
   const [pendingAuth, setPendingAuth] = useState(null);

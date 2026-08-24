@@ -111,7 +111,6 @@ function registrationPayload(overrides = {}) {
     phoneNumber: "+94 77 111 2222",
     password: "Password123",
     confirmPassword: "Password123",
-    role: "Passenger",
     ...overrides
   };
 }
@@ -143,7 +142,6 @@ describe("Sprint 1 API unit tests", () => {
       name: "Kasun Fernando",
       email: "kasun@icbt.lk",
       passwordHash: await hashPassword("Password123"),
-      role: "Driver",
       createdAt: new Date("2026-08-01T08:00:00.000Z")
     };
     passenger = {
@@ -151,7 +149,6 @@ describe("Sprint 1 API unit tests", () => {
       name: "Nethmi Perera",
       email: "nethmi@icbt.lk",
       passwordHash: await hashPassword("Password123"),
-      role: "Passenger",
       createdAt: new Date("2026-08-01T08:05:00.000Z")
     };
     otherDriver = {
@@ -159,7 +156,6 @@ describe("Sprint 1 API unit tests", () => {
       name: "Ravi Jayasuriya",
       email: "ravi@icbt.lk",
       passwordHash: await hashPassword("Password123"),
-      role: "Driver",
       createdAt: new Date("2026-08-01T08:10:00.000Z")
     };
     driverOffer = {
@@ -409,17 +405,18 @@ describe("Sprint 1 API unit tests", () => {
     expect(response.body.offers[0].status).toBe("Active");
   });
 
-  test("UT-16 denies passenger access to driver-only ride offer creation", async () => {
+  test("UT-16 allows any authenticated user to create a ride offer", async () => {
     const response = await request(app)
       .post("/api/ride-offers")
       .set("Authorization", `Bearer ${passengerToken}`)
       .send(ridePayload());
 
-    expect(response.status).toBe(403);
-    expect(response.body.message).toBe("Only drivers can create ride offers.");
+    expect(response.status).toBe(201);
+    expect(response.body.offer.driverId).toBe(passenger._id.toString());
+    expect(response.body.offer.status).toBe("Active");
   });
 
-  test("Ride detail view returns only an authenticated driver's own offer", async () => {
+  test("Ride detail view returns only an authenticated owner's own offer", async () => {
     const ownOfferResponse = await request(app)
       .get(`/api/ride-offers/${driverOffer._id}`)
       .set("Authorization", `Bearer ${driverToken}`);

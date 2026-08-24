@@ -1,6 +1,6 @@
 import { ObjectId } from "mongodb";
 import { connectToDatabase } from "./db.js";
-import { createToken, hashPassword, requireAuth, requireDriver, verifyPassword } from "./auth.js";
+import { createToken, hashPassword, requireAuth, verifyPassword } from "./auth.js";
 import { toProfile, toPublicUser, toRideOffer } from "./serializers.js";
 import { validateEmail, validatePassword, validateProfileUpdate, validateRegistration, validateRideOffer } from "./validators.js";
 
@@ -56,7 +56,6 @@ export function registerRoutes(app) {
       name: `${req.body.firstName.trim()} ${req.body.lastName.trim()}`,
       email,
       passwordHash: await hashPassword(req.body.password),
-      role: req.body.role === "Driver" ? "Driver" : "Passenger",
       createdAt: now
     };
     const result = await db.collection("users").insertOne(userDoc);
@@ -70,7 +69,7 @@ export function registerRoutes(app) {
       studentStaffId: req.body.studentStaffId?.trim() || "ICBT2024XXXX",
       homeRoute: req.body.homeRoute?.trim() || "",
       travelPreferences: [],
-      vehicleInformation: req.body.role === "Driver" ? { model: "", plateNumber: "" } : null,
+      vehicleInformation: null,
       accountType: "ICBT Student",
       updatedAt: now
     };
@@ -168,7 +167,7 @@ export function registerRoutes(app) {
     });
   }));
 
-  app.get("/api/ride-offers/active", requireAuth, requireDriver, asyncRoute(async (req, res) => {
+  app.get("/api/ride-offers/active", requireAuth, asyncRoute(async (req, res) => {
     const db = await connectToDatabase();
     const offers = await db.collection("rideOffers").find({
       driverId: req.user._id,
@@ -177,7 +176,7 @@ export function registerRoutes(app) {
     res.json({ offers: offers.map(toRideOffer) });
   }));
 
-  app.get("/api/ride-offers/draft", requireAuth, requireDriver, asyncRoute(async (req, res) => {
+  app.get("/api/ride-offers/draft", requireAuth, asyncRoute(async (req, res) => {
     const db = await connectToDatabase();
     const draft = await db.collection("rideOfferDrafts").findOne({ driverId: req.user._id });
     if (!draft) return res.json({ draft: null });
@@ -194,7 +193,7 @@ export function registerRoutes(app) {
     });
   }));
 
-  app.get("/api/ride-offers/:id", requireAuth, requireDriver, asyncRoute(async (req, res) => {
+  app.get("/api/ride-offers/:id", requireAuth, asyncRoute(async (req, res) => {
     if (!ObjectId.isValid(req.params.id)) return res.status(400).json({ message: "Invalid ride offer id." });
 
     const db = await connectToDatabase();
@@ -208,7 +207,7 @@ export function registerRoutes(app) {
     res.json({ offer: toRideOffer(offer, passengers) });
   }));
 
-  app.post("/api/ride-offers", requireAuth, requireDriver, asyncRoute(async (req, res) => {
+  app.post("/api/ride-offers", requireAuth, asyncRoute(async (req, res) => {
     const errors = validateRideOffer(req.body);
     if (Object.keys(errors).length) return res.status(400).json({ message: "Invalid ride offer details.", errors });
 

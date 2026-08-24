@@ -51,7 +51,7 @@ export function EditProfilePage(props) {
           <div className="avatar-medium">{initials}</div>
           <div>
             <h2>{form.firstName} {form.lastName}</h2>
-            <p>{props.user.role} • {props.profile.accountType}</p>
+            <p>{props.profile.accountType}</p>
             <button className="secondary-button small" type="button">Change photo</button>
           </div>
         </div>

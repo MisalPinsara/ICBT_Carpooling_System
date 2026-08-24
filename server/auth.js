@@ -14,7 +14,7 @@ export async function verifyPassword(password, passwordHash) {
 
 export function createToken(user) {
   return jwt.sign(
-    { sub: user._id.toString(), role: user.role, email: user.email },
+    { sub: user._id.toString(), email: user.email },
     config.jwtSecret,
     { expiresIn: "8h" }
   );
@@ -36,11 +36,4 @@ export async function requireAuth(req, res, next) {
   } catch {
     res.status(401).json({ message: "Authentication required." });
   }
-}
-
-export function requireDriver(req, res, next) {
-  if (req.user?.role !== "Driver") {
-    return res.status(403).json({ message: "Only drivers can create ride offers." });
-  }
-  next();
 }

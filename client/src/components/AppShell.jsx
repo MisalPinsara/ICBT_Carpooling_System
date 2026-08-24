@@ -1,4 +1,4 @@
-import { Car, ChevronLeft, Clock3, Home, List, LogOut, MessageSquare, Search, UserRound, UsersRound } from "lucide-react";
+import { Car, ChevronLeft, Clock3, Home, LogOut, MessageSquare, Search, UserRound, UsersRound } from "lucide-react";
 import { Logo } from "./Logo";
 
 const routeLabels = {
@@ -35,28 +35,17 @@ function getBackView(view, backViewOverride) {
 }
 
 export function AppShell({ user, view, setView, logout, detailBackView, children }) {
-  const driver = user.role === "Driver";
   const backView = getBackView(view, detailBackView);
   const showRoute = view !== "dashboard";
-  const menu = driver
-    ? [
-        ["dashboard", Home, "Dashboard"],
-        ["createRide", Car, "My Ride Offers"],
-        ["requests", UsersRound, "Join Requests"],
-        ["passengers", List, "Passengers"],
-        ["messages", MessageSquare, "Messages"],
-        ["journeys", Clock3, "Journeys"],
-        ["profile", UserRound, "Profile"]
-      ]
-    : [
-        ["dashboard", Home, "Dashboard"],
-        ["rides", Car, "My Ride Offers"],
-        ["requests", UsersRound, "Requests"],
-        ["find", Search, "Find a Ride"],
-        ["messages", MessageSquare, "Messages"],
-        ["journeys", List, "Journeys"],
-        ["profile", UserRound, "Profile"]
-      ];
+  const menu = [
+    ["dashboard", Home, "Dashboard"],
+    ["createRide", Car, "My Ride Offers"],
+    ["requests", UsersRound, "Join Requests"],
+    ["find", Search, "Find a Ride"],
+    ["messages", MessageSquare, "Messages"],
+    ["journeys", Clock3, "Journeys"],
+    ["profile", UserRound, "Profile"]
+  ];
 
   return (
     <main className="app-shell">
