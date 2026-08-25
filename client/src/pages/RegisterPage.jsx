@@ -5,13 +5,14 @@ import { api } from "../services/api";
 import { hasErrors, validateRegisterForm } from "../utils/validation";
 
 export function RegisterPage({ onLogin, onAuthed }) {
-  const [form, setForm] = useState({ firstName: "", lastName: "", email: "", phoneNumber: "", password: "", confirmPassword: "", role: "Passenger" });
+  const [form, setForm] = useState({ firstName: "", lastName: "", email: "", phoneNumber: "", password: "", confirmPassword: "" });
   const [error, setError] = useState("");
   const [fieldErrors, setFieldErrors] = useState({});
   const [pendingAuth, setPendingAuth] = useState(null);
 
   const update = (key, value) => {
-    setForm((current) => ({ ...current, [key]: value }));
+    const nextValue = key === "phoneNumber" ? value.replace(/\D/g, "").slice(0, 10) : value;
+    setForm((current) => ({ ...current, [key]: nextValue }));
     setError("");
     setFieldErrors((current) => ({ ...current, [key]: "" }));
   };
@@ -41,7 +42,7 @@ export function RegisterPage({ onLogin, onAuthed }) {
           <Field label="First Name" value={form.firstName} placeholder="Enter your first name" error={fieldErrors.firstName} onChange={(value) => update("firstName", value)} />
           <Field label="Last Name" value={form.lastName} placeholder="Enter your last name" error={fieldErrors.lastName} onChange={(value) => update("lastName", value)} />
           <Field label="Email" value={form.email} placeholder="Enter your email" error={fieldErrors.email} onChange={(value) => update("email", value)} />
-          <Field label="Phone Number" value={form.phoneNumber} placeholder="Enter your phone number" error={fieldErrors.phoneNumber} onChange={(value) => update("phoneNumber", value)} />
+          <Field label="Phone Number" value={form.phoneNumber} placeholder="Enter your phone number" error={fieldErrors.phoneNumber} onChange={(value) => update("phoneNumber", value)} maxLength={10} inputMode="numeric" pattern="[0-9]*" />
           <Field label="Password" type="password" value={form.password} placeholder="Create a password" error={fieldErrors.password} onChange={(value) => update("password", value)} />
           <Field label="Confirm Password" type="password" value={form.confirmPassword} placeholder="Confirm your password" error={fieldErrors.confirmPassword} onChange={(value) => update("confirmPassword", value)} />
           {error && <p className="form-error">{error}</p>}

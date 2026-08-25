@@ -1,8 +1,8 @@
 import { ObjectId } from "mongodb";
 import { connectToDatabase } from "./db.js";
 import { createToken, hashPassword, requireAuth, verifyPassword } from "./auth.js";
-import { toProfile, toPublicUser, toRideOffer, toPublicRideOffer, toJoinRequest } from "./serializers.js";
-import { validateEmail, validatePassword, validateProfileUpdate, validateRegistration, validateRideOffer, validateJoinRequest, buildSearchQuery } from "./validators.js";
+import { toProfile, toPublicUser, toRideOffer } from "./serializers.js";
+import { validateEmail, validatePassword, validateProfileUpdate, validateRegistration, validateRideOffer } from "./validators.js";
 
 const asyncRoute = (handler) => (req, res, next) => {
   Promise.resolve(handler(req, res, next)).catch(next);
@@ -56,7 +56,6 @@ export function registerRoutes(app) {
       name: `${req.body.firstName.trim()} ${req.body.lastName.trim()}`,
       email,
       passwordHash: await hashPassword(req.body.password),
-      role: req.body.role === "Driver" ? "Driver" : "Passenger",
       createdAt: now
     };
     const result = await db.collection("users").insertOne(userDoc);
@@ -70,7 +69,7 @@ export function registerRoutes(app) {
       studentStaffId: req.body.studentStaffId?.trim() || "ICBT2024XXXX",
       homeRoute: req.body.homeRoute?.trim() || "",
       travelPreferences: [],
-      vehicleInformation: req.body.role === "Driver" ? { model: "", plateNumber: "" } : null,
+      vehicleInformation: null,
       accountType: "ICBT Student",
       updatedAt: now
     };
@@ -192,43 +191,6 @@ export function registerRoutes(app) {
         availableSeats: draft.availableSeats
       }
     });
-  }));
-
-  // ── Sprint 2: S2-T05 ──────────────────────────────────────────────────────────
-  // Search active ride offers — must be registered BEFORE /:id to avoid Express
-  // matching "search" as a dynamic :id with requireDriver.
-  app.get("/api/ride-offers/search", requireAuth, asyncRoute(async (req, res) => {
-    const db = await connectToDatabase();
-    const searchFilter = buildSearchQuery(req.query);
-    const filter = {
-      ...searchFilter,
-      status: "Active",
-      availableSeats: { $gt: 0 },
-      userId: { $ne: req.user._id }
-    };
-    const offers = await db.collection("rideOffers").find(filter).sort({ createdAt: -1 }).toArray();
-    if (!offers.length) {
-      return res.json({ offers: [], message: "No matching rides found for your search criteria." });
-    }
-    const userIds = [...new Set(offers.map((o) => o.userId))];
-    const profiles = await db.collection("profiles").find({ userId: { $in: userIds } }).toArray();
-    const profileByUserId = new Map(profiles.map((p) => [p.userId.toString(), p]));
-    const serialized = offers.map((offer) => {
-      const ownerProfile = profileByUserId.get(offer.userId.toString());
-      return toPublicRideOffer(offer, ownerProfile);
-    });
-    res.json({ offers: serialized });
-  }));
-
-  // ── Sprint 2: S2-T06 ──────────────────────────────────────────────────────────
-  // Public offer detail — must also be before /:id.
-  app.get("/api/ride-offers/public/:id", requireAuth, asyncRoute(async (req, res) => {
-    if (!ObjectId.isValid(req.params.id)) return res.status(400).json({ message: "Invalid ride offer id." });
-    const db = await connectToDatabase();
-    const offer = await db.collection("rideOffers").findOne({ _id: new ObjectId(req.params.id) });
-    if (!offer) return res.status(404).json({ message: "Ride offer not found." });
-    const ownerProfile = await db.collection("profiles").findOne({ userId: offer.userId });
-    res.json({ offer: toPublicRideOffer(offer, ownerProfile) });
   }));
 
   app.get("/api/ride-offers/:id", requireAuth, asyncRoute(async (req, res) => {

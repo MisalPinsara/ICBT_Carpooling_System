@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AppShell } from "../components/AppShell";
 import { Field } from "../components/Field";
 import { Info } from "../components/Info";
@@ -18,9 +18,17 @@ export function ProfilePage(props) {
   });
   const [error, setError] = useState("");
   const [fieldErrors, setFieldErrors] = useState({});
+  const [flash, setFlash] = useState("");
+
+  useEffect(() => {
+    if (!flash) return undefined;
+    const timeoutId = window.setTimeout(() => setFlash(""), 4200);
+    return () => window.clearTimeout(timeoutId);
+  }, [flash]);
 
   const update = (key, value) => {
-    setForm((current) => ({ ...current, [key]: value }));
+    const nextValue = key === "phoneNumber" ? value.replace(/\D/g, "").slice(0, 10) : value;
+    setForm((current) => ({ ...current, [key]: nextValue }));
     setError("");
     setFieldErrors((current) => ({ ...current, [key]: "" }));
   };
@@ -36,6 +44,7 @@ export function ProfilePage(props) {
       const data = await api.updateProfile(form);
       props.updateAuth(data);
       setShowEdit(false);
+      setFlash("profile updated successfully");
     } catch (err) {
       setError(err.message);
       setFieldErrors(err.details || {});
@@ -44,6 +53,7 @@ export function ProfilePage(props) {
 
   return (
     <AppShell {...props}>
+      {flash && <div className="top-alert" role="status">{flash}</div>}
       <section className="intro compact-intro">
         <h2>My Profile</h2>
         <p>View your account and personal information.</p>
@@ -53,7 +63,7 @@ export function ProfilePage(props) {
           <div className="avatar-large">{initials}</div>
           <div>
             <h2>{user.name}</h2>
-            <p>{user.role} • {profile.accountType}</p>
+            <p>{profile.accountType}</p>
             <div className="profile-actions">
               <button className="primary-button small" type="button" onClick={() => setShowEdit(true)}>Edit Profile</button>
               <button className="secondary-button small" type="button">Change Password</button>
@@ -67,7 +77,6 @@ export function ProfilePage(props) {
           <Info label="Email" value={user.email} />
           <Info label="Phone Number" value={profile.phoneNumber} />
           <Info label="Student / Staff ID" value={profile.studentStaffId} />
-          <Info label="Role" value={user.role} />
           <Info label="Home Route" value={profile.homeRoute} wide />
         </div>
       </section>
@@ -84,7 +93,7 @@ export function ProfilePage(props) {
             <Field label="First Name" value={form.firstName} error={fieldErrors.firstName} onChange={(value) => update("firstName", value)} />
             <Field label="Last Name" value={form.lastName} error={fieldErrors.lastName} onChange={(value) => update("lastName", value)} />
             <Field label="Email" value={form.email} onChange={() => {}} suffix="Account email" disabled />
-            <Field label="Phone Number" value={form.phoneNumber} error={fieldErrors.phoneNumber} onChange={(value) => update("phoneNumber", value)} />
+            <Field label="Phone Number" value={form.phoneNumber} error={fieldErrors.phoneNumber} onChange={(value) => update("phoneNumber", value)} maxLength={10} inputMode="numeric" pattern="[0-9]*" />
             {error && <p className="form-error">{error}</p>}
             <div className="edit-actions">
               <button className="secondary-button small" type="button" onClick={() => setShowEdit(false)}>Cancel</button>

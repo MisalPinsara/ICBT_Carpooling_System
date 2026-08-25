@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
 import { ValidationMessage } from "./ValidationMessage";
 
-export function Field({ label, value = "", placeholder, type = "text", icon, onChange, iconRight, suffix, disabled, error }) {
+export function Field({ label, value = "", placeholder, type = "text", icon, onChange, iconRight, suffix, disabled, error, maxLength, inputMode, pattern }) {
   const [showPassword, setShowPassword] = useState(false);
   const isPassword = type === "password";
   const inputType = isPassword && showPassword ? "text" : type;
@@ -17,6 +17,9 @@ export function Field({ label, value = "", placeholder, type = "text", icon, onC
           value={value}
           placeholder={placeholder}
           disabled={disabled}
+          maxLength={maxLength}
+          inputMode={inputMode}
+          pattern={pattern}
           aria-invalid={error ? "true" : "false"}
           onChange={(event) => onChange(event.target.value)}
         />

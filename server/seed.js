@@ -16,7 +16,6 @@ async function seed() {
       name: "Kasun Fernando",
       email: "kasun@icbt.lk",
       passwordHash: await hashPassword("Password123"),
-      role: "Driver",
       createdAt: now
       },
       $setOnInsert: { _id: kasunId }
@@ -30,7 +29,6 @@ async function seed() {
       name: "Nethmi Perera",
       email: "nethmi@icbt.lk",
       passwordHash: await hashPassword("Password123"),
-      role: "Passenger",
       createdAt: now
       },
       $setOnInsert: { _id: nethmiId }
@@ -48,7 +46,7 @@ async function seed() {
       userId: kasun._id,
       firstName: "Kasun",
       lastName: "Fernando",
-      phoneNumber: "+94 76 456 7890",
+      phoneNumber: "0764567890",
       studentStaffId: "ICBT2024DRVR",
       homeRoute: "Maharagama -> ICBT Campus",
       travelPreferences: ["Morning commute"],
@@ -66,7 +64,7 @@ async function seed() {
       userId: nethmi._id,
       firstName: "Nethmi",
       lastName: "Perera",
-      phoneNumber: "+94 77 123 4567",
+      phoneNumber: "0771234567",
       studentStaffId: "ICBT2024XXXX",
       homeRoute: "Panadura -> ICBT Campus",
       travelPreferences: ["Quiet ride", "Morning classes"],

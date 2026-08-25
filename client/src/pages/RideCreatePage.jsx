@@ -60,6 +60,7 @@ export function RideCreatePage(props) {
   const [offers, setOffers] = useState(null);
   const [showForm, setShowForm] = useState(false);
   const [fieldErrors, setFieldErrors] = useState({});
+  const [flash, setFlash] = useState(() => sessionStorage.getItem("rideOfferFlash") || "");
 
   useEffect(() => {
     Promise.all([api.rideDraft(), api.activeRideOffers()]).then(([data, offerData]) => {
@@ -75,6 +76,13 @@ export function RideCreatePage(props) {
       setOffers(Array.isArray(offerData.offers) ? offerData.offers : []);
     });
   }, []);
+
+  useEffect(() => {
+    if (!flash) return undefined;
+    sessionStorage.removeItem("rideOfferFlash");
+    const timeoutId = window.setTimeout(() => setFlash(""), 4200);
+    return () => window.clearTimeout(timeoutId);
+  }, [flash]);
 
   const update = (key, value) => {
     setForm((current) => ({ ...current, [key]: value }));
@@ -99,6 +107,7 @@ export function RideCreatePage(props) {
 
   return (
     <AppShell {...props}>
+      {flash && <div className="top-alert" role="status">{flash}</div>}
       <section className="offers-title-row">
         <div className="intro compact-intro">
           <h2>Offer a ride</h2>

@@ -6,12 +6,21 @@ export function validatePassword(password) {
   return typeof password === "string" && password.length >= 8;
 }
 
+export function validatePhoneNumber(phoneNumber) {
+  if (typeof phoneNumber !== "string" || !phoneNumber.trim()) return "Phone number is required.";
+  const trimmedPhoneNumber = phoneNumber.trim();
+  if (!/^\d+$/.test(trimmedPhoneNumber)) return "Phone number can only include numbers.";
+  if (trimmedPhoneNumber.length > 10) return "Phone number must be 10 digits or fewer.";
+  return "";
+}
+
 export function validateRegistration(payload) {
   const errors = {};
   if (!payload.firstName?.trim()) errors.firstName = "First name is required.";
   if (!payload.lastName?.trim()) errors.lastName = "Last name is required.";
   if (!validateEmail(payload.email)) errors.email = "A valid email is required.";
-  if (!payload.phoneNumber?.trim()) errors.phoneNumber = "Phone number is required.";
+  const phoneError = validatePhoneNumber(payload.phoneNumber);
+  if (phoneError) errors.phoneNumber = phoneError;
   if (!validatePassword(payload.password)) errors.password = "Password must be at least 8 characters.";
   if (payload.password !== payload.confirmPassword) errors.confirmPassword = "Passwords must match.";
   return errors;
@@ -21,7 +30,8 @@ export function validateProfileUpdate(payload) {
   const errors = {};
   if (!payload.firstName?.trim()) errors.firstName = "First name is required.";
   if (!payload.lastName?.trim()) errors.lastName = "Last name is required.";
-  if (!payload.phoneNumber?.trim()) errors.phoneNumber = "Phone number is required.";
+  const phoneError = validatePhoneNumber(payload.phoneNumber);
+  if (phoneError) errors.phoneNumber = phoneError;
   return errors;
 }
 

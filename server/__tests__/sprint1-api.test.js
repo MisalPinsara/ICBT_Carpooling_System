@@ -20,10 +20,9 @@ function registrationPayload(overrides = {}) {
     firstName: "Amani",
     lastName: "Silva",
     email: "amani@icbt.lk",
-    phoneNumber: "+94 77 111 2222",
+    phoneNumber: "0771112222",
     password: "Password123",
     confirmPassword: "Password123",
-    role: "Passenger",
     ...overrides
   };
 }
@@ -55,7 +54,6 @@ describe("Sprint 1 API unit tests", () => {
       name: "Kasun Fernando",
       email: "kasun@icbt.lk",
       passwordHash: await hashPassword("Password123"),
-      role: "Driver",
       createdAt: new Date("2026-08-01T08:00:00.000Z")
     };
     passenger = {
@@ -63,7 +61,6 @@ describe("Sprint 1 API unit tests", () => {
       name: "Nethmi Perera",
       email: "nethmi@icbt.lk",
       passwordHash: await hashPassword("Password123"),
-      role: "Passenger",
       createdAt: new Date("2026-08-01T08:05:00.000Z")
     };
     otherDriver = {
@@ -71,7 +68,6 @@ describe("Sprint 1 API unit tests", () => {
       name: "Ravi Jayasuriya",
       email: "ravi@icbt.lk",
       passwordHash: await hashPassword("Password123"),
-      role: "Driver",
       createdAt: new Date("2026-08-01T08:10:00.000Z")
     };
     driverOffer = {
@@ -109,7 +105,7 @@ describe("Sprint 1 API unit tests", () => {
           userId: driver._id,
           firstName: "Kasun",
           lastName: "Fernando",
-          phoneNumber: "+94 76 456 7890",
+          phoneNumber: "0764567890",
           studentStaffId: "ICBT2024DRVR",
           homeRoute: "Maharagama -> ICBT Campus",
           travelPreferences: [],
@@ -122,7 +118,7 @@ describe("Sprint 1 API unit tests", () => {
           userId: passenger._id,
           firstName: "Nethmi",
           lastName: "Perera",
-          phoneNumber: "+94 77 123 4567",
+          phoneNumber: "0771234567",
           studentStaffId: "ICBT2024XXXX",
           homeRoute: "Panadura -> ICBT Campus",
           travelPreferences: [],
@@ -228,13 +224,13 @@ describe("Sprint 1 API unit tests", () => {
       .send({
         firstName: "Kasun",
         lastName: "Perera",
-        phoneNumber: "+94 71 222 3333",
+        phoneNumber: "0712223333",
         homeRoute: "Kottawa -> ICBT Campus"
       });
 
     expect(response.status).toBe(200);
     expect(response.body.user.name).toBe("Kasun Perera");
-    expect(response.body.profile.phoneNumber).toBe("+94 71 222 3333");
+    expect(response.body.profile.phoneNumber).toBe("0712223333");
     expect(response.body.profile.homeRoute).toBe("Kottawa -> ICBT Campus");
   });
 
@@ -321,18 +317,18 @@ describe("Sprint 1 API unit tests", () => {
     expect(response.body.offers[0].status).toBe("Active");
   });
 
-  test("UT-16 any authenticated user can create a ride offer", async () => {
+  test("UT-16 allows any authenticated user to create a ride offer", async () => {
     const response = await request(app)
       .post("/api/ride-offers")
       .set("Authorization", `Bearer ${passengerToken}`)
       .send(ridePayload());
 
     expect(response.status).toBe(201);
-    expect(response.body.offer.userId).toBe(passenger._id.toString());
+    expect(response.body.offer.driverId).toBe(passenger._id.toString());
     expect(response.body.offer.status).toBe("Active");
   });
 
-  test("Ride detail view returns only the authenticated user's own offer", async () => {
+  test("Ride detail view returns only an authenticated owner's own offer", async () => {
     const ownOfferResponse = await request(app)
       .get(`/api/ride-offers/${driverOffer._id}`)
       .set("Authorization", `Bearer ${driverToken}`);

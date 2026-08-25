@@ -17,7 +17,8 @@ export function EditProfilePage(props) {
   const initials = `${form.firstName?.[0] || ""}${form.lastName?.[0] || ""}`;
 
   const update = (key, value) => {
-    setForm((current) => ({ ...current, [key]: value }));
+    const nextValue = key === "phoneNumber" ? value.replace(/\D/g, "").slice(0, 10) : value;
+    setForm((current) => ({ ...current, [key]: nextValue }));
     setError("");
     setFieldErrors((current) => ({ ...current, [key]: "" }));
   };
@@ -51,14 +52,14 @@ export function EditProfilePage(props) {
           <div className="avatar-medium">{initials}</div>
           <div>
             <h2>{form.firstName} {form.lastName}</h2>
-            <p>{props.user.role} • {props.profile.accountType}</p>
+            <p>{props.profile.accountType}</p>
             <button className="secondary-button small" type="button">Change photo</button>
           </div>
         </div>
         <Field label="First Name" value={form.firstName} error={fieldErrors.firstName} onChange={(value) => update("firstName", value)} />
         <Field label="Last Name" value={form.lastName} error={fieldErrors.lastName} onChange={(value) => update("lastName", value)} />
         <Field label="Email" value={form.email} onChange={() => {}} suffix="Account email" disabled />
-        <Field label="Phone Number" value={form.phoneNumber} error={fieldErrors.phoneNumber} onChange={(value) => update("phoneNumber", value)} />
+        <Field label="Phone Number" value={form.phoneNumber} error={fieldErrors.phoneNumber} onChange={(value) => update("phoneNumber", value)} maxLength={10} inputMode="numeric" pattern="[0-9]*" />
         {error && <p className="form-error">{error}</p>}
         <div className="edit-actions">
           <button className="secondary-button small" type="button" onClick={() => props.setView("profile")}>Cancel</button>
