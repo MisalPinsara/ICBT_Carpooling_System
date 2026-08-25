@@ -33,8 +33,8 @@ async function ensureIndexes(database) {
   await Promise.all([
     database.collection("users").createIndex({ email: 1 }, { unique: true }),
     database.collection("profiles").createIndex({ userId: 1 }, { unique: true }),
-    database.collection("rideOffers").createIndex({ driverId: 1, status: 1 }),
-    database.collection("rideOfferDrafts").createIndex({ driverId: 1 }, { unique: true }),
+    database.collection("rideOffers").createIndex({ userId: 1, status: 1 }),
+    database.collection("rideOfferDrafts").createIndex({ userId: 1 }, { unique: true }),
     database.collection("joinRequests").createIndex({ seedKey: 1 }, { unique: true, sparse: true }),
     database.collection("activities").createIndex({ seedKey: 1 }, { unique: true, sparse: true }),
     database.collection("activities").createIndex({ userId: 1, createdAt: -1 })

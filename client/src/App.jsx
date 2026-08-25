@@ -10,6 +10,9 @@ import { RideDetailsPage } from "./pages/RideDetailsPage";
 import { ProfilePage } from "./pages/ProfilePage";
 import { EditProfilePage } from "./pages/EditProfilePage";
 import { EmptyStatePage } from "./pages/EmptyStatePage";
+import { SearchRidePage } from "./pages/SearchRidePage";
+import { OfferDetailPage } from "./pages/OfferDetailPage";
+import { MyRequestsPage } from "./pages/MyRequestsPage";
 import { LoadingWindow } from "./components/LoadingWindow";
 import { api } from "./services/api";
 
@@ -17,6 +20,7 @@ export function App() {
   const [auth, setAuth] = useState({ user: null, profile: null, loading: true });
   const [selectedRideId, setSelectedRideId] = useState(() => sessionStorage.getItem("selectedRideOfferId") || "");
   const [detailBackView, setDetailBackView] = useState(() => sessionStorage.getItem("rideDetailsBackView") || "createRide");
+  const [selectedPublicOfferId, setSelectedPublicOfferId] = useState(() => sessionStorage.getItem("selectedPublicOfferId") || "");
   const [view, setView] = useState(() => {
     const hash = window.location.hash.replace("#", "");
     return ["register", "forgot"].includes(hash) ? hash : "login";
@@ -70,6 +74,12 @@ export function App() {
     navigate("rideDetails");
   };
 
+  const openPublicOfferDetail = (offerId) => {
+    setSelectedPublicOfferId(offerId);
+    sessionStorage.setItem("selectedPublicOfferId", offerId);
+    navigate("offerDetail");
+  };
+
   if (auth.loading) return <LoadingWindow text="Loading ICBT Carpool" fullPage />;
 
   if (!auth.user) {
@@ -87,6 +97,8 @@ export function App() {
     selectedRideId,
     detailBackView,
     openRideDetails,
+    selectedPublicOfferId,
+    openPublicOfferDetail,
     updateAuth: (next) => setAuth((current) => ({ ...current, ...next }))
   };
 
@@ -96,8 +108,12 @@ export function App() {
   if (view === "rideCreated") return <RideCreatedPage {...sharedProps} />;
   if (view === "editProfile") return <EditProfilePage {...sharedProps} />;
   if (view === "profile") return <ProfilePage {...sharedProps} />;
+  // Sprint 2 pages
+  if (view === "find") return <SearchRidePage {...sharedProps} />;
+  if (view === "offerDetail") return <OfferDetailPage {...sharedProps} />;
+  if (view === "myRequests") return <MyRequestsPage {...sharedProps} />;
 
-  const emptyViews = ["rides", "requests", "find", "messages", "journeys", "passengers"];
+  const emptyViews = ["rides", "messages", "journeys", "passengers"];
   if (emptyViews.includes(view)) return <EmptyStatePage {...sharedProps} />;
 
   return <DashboardPage {...sharedProps} />;

@@ -65,8 +65,8 @@ export function DashboardPage(props) {
         <article className="panel action-panel">
           <h3>Quick Actions</h3>
           <button className="primary-button" type="button" onClick={() => props.setView("createRide")}>+ Create / Offer Ride</button>
-          <button className="secondary-button" type="button">Find a Ride</button>
-          <button className="secondary-button" type="button">View Requests</button>
+          <button id="dashboard-find-ride-btn" className="secondary-button" type="button" onClick={() => props.setView("find")}>Find a Ride</button>
+          <button id="dashboard-view-requests-btn" className="secondary-button" type="button" onClick={() => props.setView("myRequests")}>View My Requests</button>
         </article>
       </section>
       <section className="activity">
