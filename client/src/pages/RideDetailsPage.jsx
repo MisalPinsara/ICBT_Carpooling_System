@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
 import { Car } from "lucide-react";
 import { AppShell } from "../components/AppShell";
 import { Info } from "../components/Info";
@@ -8,7 +9,8 @@ import { api } from "../services/api";
 export function RideDetailsPage(props) {
   const [offer, setOffer] = useState(null);
   const [error, setError] = useState("");
-  const rideId = props.selectedRideId || sessionStorage.getItem("selectedRideOfferId");
+  const { rideId: routeRideId } = useParams();
+  const rideId = routeRideId || props.selectedRideId || sessionStorage.getItem("selectedRideOfferId");
 
   useEffect(() => {
     if (!rideId) {
