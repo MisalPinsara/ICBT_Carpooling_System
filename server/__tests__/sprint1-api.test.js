@@ -108,7 +108,7 @@ function registrationPayload(overrides = {}) {
     firstName: "Amani",
     lastName: "Silva",
     email: "amani@icbt.lk",
-    phoneNumber: "+94 77 111 2222",
+    phoneNumber: "0771112222",
     password: "Password123",
     confirmPassword: "Password123",
     ...overrides
@@ -193,7 +193,7 @@ describe("Sprint 1 API unit tests", () => {
           userId: driver._id,
           firstName: "Kasun",
           lastName: "Fernando",
-          phoneNumber: "+94 76 456 7890",
+          phoneNumber: "0764567890",
           studentStaffId: "ICBT2024DRVR",
           homeRoute: "Maharagama -> ICBT Campus",
           travelPreferences: [],
@@ -206,7 +206,7 @@ describe("Sprint 1 API unit tests", () => {
           userId: passenger._id,
           firstName: "Nethmi",
           lastName: "Perera",
-          phoneNumber: "+94 77 123 4567",
+          phoneNumber: "0771234567",
           studentStaffId: "ICBT2024XXXX",
           homeRoute: "Panadura -> ICBT Campus",
           travelPreferences: [],
@@ -312,13 +312,13 @@ describe("Sprint 1 API unit tests", () => {
       .send({
         firstName: "Kasun",
         lastName: "Perera",
-        phoneNumber: "+94 71 222 3333",
+        phoneNumber: "0712223333",
         homeRoute: "Kottawa -> ICBT Campus"
       });
 
     expect(response.status).toBe(200);
     expect(response.body.user.name).toBe("Kasun Perera");
-    expect(response.body.profile.phoneNumber).toBe("+94 71 222 3333");
+    expect(response.body.profile.phoneNumber).toBe("0712223333");
     expect(response.body.profile.homeRoute).toBe("Kottawa -> ICBT Campus");
   });
 

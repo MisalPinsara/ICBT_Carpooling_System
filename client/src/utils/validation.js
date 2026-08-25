@@ -4,6 +4,14 @@ function required(value, label) {
   return value?.toString().trim() ? "" : `${label} is required.`;
 }
 
+function validatePhoneNumber(value) {
+  const phoneNumber = value?.toString().trim() || "";
+  if (!phoneNumber) return "Phone number is required.";
+  if (!/^\d+$/.test(phoneNumber)) return "Phone number can only include numbers.";
+  if (phoneNumber.length > 10) return "Phone number must be 10 digits or fewer.";
+  return "";
+}
+
 export function validateLogin(form) {
   return {
     email: required(form.email, "Email"),
@@ -16,7 +24,7 @@ export function validateRegisterForm(form) {
     firstName: required(form.firstName, "First name"),
     lastName: required(form.lastName, "Last name"),
     email: required(form.email, "Email"),
-    phoneNumber: required(form.phoneNumber, "Phone number"),
+    phoneNumber: validatePhoneNumber(form.phoneNumber),
     password: required(form.password, "Password"),
     confirmPassword: required(form.confirmPassword, "Confirm password")
   };
@@ -53,7 +61,7 @@ export function validateProfileForm(form) {
   return {
     firstName: required(form.firstName, "First name"),
     lastName: required(form.lastName, "Last name"),
-    phoneNumber: required(form.phoneNumber, "Phone number")
+    phoneNumber: validatePhoneNumber(form.phoneNumber)
   };
 }
 

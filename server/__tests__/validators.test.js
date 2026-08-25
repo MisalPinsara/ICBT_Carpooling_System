@@ -19,7 +19,7 @@ describe("Sprint 1 validation rules", () => {
       firstName: "Nethmi",
       lastName: "Perera",
       email: "nethmi@icbt.lk",
-      phoneNumber: "+94 77 123 4567",
+      phoneNumber: "0771234567",
       password: "Password123",
       confirmPassword: "Different123"
     });
@@ -29,9 +29,13 @@ describe("Sprint 1 validation rules", () => {
 
   test("UT-08 rejects invalid profile data", () => {
     const errors = validateProfileUpdate({ firstName: "", lastName: "Perera", phoneNumber: "" });
+    const nonNumericPhoneErrors = validateProfileUpdate({ firstName: "Nethmi", lastName: "Perera", phoneNumber: "077ABC1234" });
+    const longPhoneErrors = validateProfileUpdate({ firstName: "Nethmi", lastName: "Perera", phoneNumber: "07712345678" });
 
     expect(errors.firstName).toBe("First name is required.");
     expect(errors.phoneNumber).toBe("Phone number is required.");
+    expect(nonNumericPhoneErrors.phoneNumber).toBe("Phone number can only include numbers.");
+    expect(longPhoneErrors.phoneNumber).toBe("Phone number must be 10 digits or fewer.");
   });
 
   test("UT-10 rejects ride offers with zero seats", () => {
