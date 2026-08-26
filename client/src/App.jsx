@@ -27,8 +27,10 @@ const viewPaths = {
   rideCreated: "/my-ride-offers/published",
   profile: "/profile",
   editProfile: "/profile/edit",
+  myRequests: "/join-requests",
   requests: "/join-requests",
   find: "/find-a-ride",
+  offerDetail: "/find-a-ride/detail",
   messages: "/messages",
   journeys: "/journeys",
   passengers: "/passengers",
@@ -39,6 +41,8 @@ function viewFromPath(pathname) {
   if (pathname.startsWith("/my-ride-offers/") && pathname !== "/my-ride-offers/review" && pathname !== "/my-ride-offers/published") return "rideDetails";
   if (pathname === "/my-ride-offers/review") return "reviewRide";
   if (pathname === "/my-ride-offers/published") return "rideCreated";
+  if (pathname === "/find-a-ride/detail") return "offerDetail";
+  if (pathname === "/join-requests") return "myRequests";
   return Object.entries(viewPaths).find(([, path]) => path === pathname)?.[0] || "dashboard";
 }
 
@@ -48,6 +52,7 @@ export function App() {
   const [auth, setAuth] = useState({ user: null, profile: null, loading: true });
   const [selectedRideId, setSelectedRideId] = useState(() => sessionStorage.getItem("selectedRideOfferId") || "");
   const [detailBackView, setDetailBackView] = useState(() => sessionStorage.getItem("rideDetailsBackView") || "createRide");
+  const [selectedPublicOfferId, setSelectedPublicOfferId] = useState(() => sessionStorage.getItem("selectedPublicOfferId") || "");
   const view = viewFromPath(location.pathname);
 
   const navigate = (nextView) => {
@@ -143,8 +148,9 @@ export function App() {
       <Route path="/my-ride-offers/:rideId" element={<RideDetailsPage {...sharedProps} />} />
       <Route path="/profile" element={<ProfilePage {...sharedProps} />} />
       <Route path="/profile/edit" element={<EditProfilePage {...sharedProps} />} />
-      <Route path="/join-requests" element={<EmptyStatePage {...sharedProps} view="requests" />} />
-      <Route path="/find-a-ride" element={<EmptyStatePage {...sharedProps} view="find" />} />
+      <Route path="/join-requests" element={<MyRequestsPage {...sharedProps} />} />
+      <Route path="/find-a-ride" element={<SearchRidePage {...sharedProps} />} />
+      <Route path="/find-a-ride/detail" element={<OfferDetailPage {...sharedProps} />} />
       <Route path="/messages" element={<EmptyStatePage {...sharedProps} view="messages" />} />
       <Route path="/journeys" element={<EmptyStatePage {...sharedProps} view="journeys" />} />
       <Route path="/passengers" element={<EmptyStatePage {...sharedProps} view="passengers" />} />

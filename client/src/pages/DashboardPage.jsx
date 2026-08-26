@@ -7,15 +7,27 @@ import { api } from "../services/api";
 
 export function DashboardPage(props) {
   const [dashboard, setDashboard] = useState(null);
-  const firstName = props.profile.firstName;
+  const [error, setError] = useState("");
+  const firstName = props.profile?.firstName || props.user?.name?.split(" ")[0] || "User";
 
   useEffect(() => {
-    api.dashboard().then(setDashboard);
+    let isMounted = true;
+    api.dashboard()
+      .then((data) => {
+        if (isMounted) setDashboard(data);
+      })
+      .catch((err) => {
+        if (isMounted) {
+          setError(err.message || "Failed to load dashboard");
+          setDashboard({
+            stats: { activeRides: 0, pendingRequests: 0, availableSeats: 0, upcomingJourneys: 0 },
+            currentRide: null,
+            activities: []
+          });
+        }
+      });
+    return () => { isMounted = false; };
   }, []);
-
-  const stats = dashboard?.stats || {};
-  const ride = dashboard?.currentRide;
-  const activity = dashboard?.activities?.[0];
 
   if (!dashboard) {
     return (
@@ -24,6 +36,10 @@ export function DashboardPage(props) {
       </AppShell>
     );
   }
+
+  const stats = dashboard?.stats || {};
+  const ride = dashboard?.currentRide;
+  const activity = dashboard?.activities?.[0];
 
   return (
     <AppShell {...props}>

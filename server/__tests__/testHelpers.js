@@ -68,6 +68,12 @@ function valuesEqual(left, right) {
 
 export function matchesFilter(doc, filter) {
   return Object.entries(filter).every(([key, expected]) => {
+    if (key === "$or" && Array.isArray(expected)) {
+      return expected.some((subFilter) => matchesFilter(doc, subFilter));
+    }
+    if (key === "$and" && Array.isArray(expected)) {
+      return expected.every((subFilter) => matchesFilter(doc, subFilter));
+    }
     const actual = getValue(doc, key);
     if (expected && typeof expected === "object" && "$in" in expected) {
       return expected.$in.some((value) => valuesEqual(actual, value));

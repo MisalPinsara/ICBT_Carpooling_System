@@ -324,7 +324,7 @@ describe("Sprint 1 API unit tests", () => {
       .send(ridePayload());
 
     expect(response.status).toBe(201);
-    expect(response.body.offer.driverId).toBe(passenger._id.toString());
+    expect(response.body.offer.userId).toBe(passenger._id.toString());
     expect(response.body.offer.status).toBe("Active");
   });
 

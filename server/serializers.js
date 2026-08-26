@@ -8,25 +8,28 @@ export function toPublicUser(user) {
 }
 
 export function toProfile(profile) {
+  if (!profile) return null;
   return {
-    id: profile._id.toString(),
-    userId: profile.userId.toString(),
-    firstName: profile.firstName,
-    lastName: profile.lastName,
-    phoneNumber: profile.phoneNumber,
-    studentStaffId: profile.studentStaffId,
-    homeRoute: profile.homeRoute,
-    travelPreferences: profile.travelPreferences,
-    vehicleInformation: profile.vehicleInformation,
-    accountType: profile.accountType,
+    id: profile._id ? profile._id.toString() : "",
+    userId: profile.userId ? profile.userId.toString() : "",
+    firstName: profile.firstName || "",
+    lastName: profile.lastName || "",
+    phoneNumber: profile.phoneNumber || "",
+    studentStaffId: profile.studentStaffId || "",
+    homeRoute: profile.homeRoute || "",
+    travelPreferences: profile.travelPreferences || [],
+    vehicleInformation: profile.vehicleInformation || null,
+    accountType: profile.accountType || "",
     updatedAt: profile.updatedAt
   };
 }
 
 export function toRideOffer(offer, passengers = []) {
+  if (!offer) return null;
+  const rawUserId = offer.userId || offer.driverId;
   return {
-    id: offer._id.toString(),
-    userId: offer.userId.toString(),
+    id: offer._id ? offer._id.toString() : "",
+    userId: rawUserId ? rawUserId.toString() : "",
     origin: offer.origin,
     destination: offer.destination,
     departureDate: offer.departureDate,
@@ -41,10 +44,11 @@ export function toRideOffer(offer, passengers = []) {
 }
 
 // Sprint 2: privacy-aware serializer for public offer listings/detail.
-// Omits driverId, acceptedPassengers, passengers list and private contact data.
+// Omits driverId/userId, acceptedPassengers, passengers list and private contact data.
 export function toPublicRideOffer(offer, ownerSummary = null) {
+  if (!offer) return null;
   return {
-    id: offer._id.toString(),
+    id: offer._id ? offer._id.toString() : "",
     origin: offer.origin,
     destination: offer.destination,
     departureDate: offer.departureDate,
@@ -62,10 +66,12 @@ export function toPublicRideOffer(offer, ownerSummary = null) {
 
 // Sprint 2: join-request serializer with embedded offer summary.
 export function toJoinRequest(joinReq, offerSummary = null) {
+  if (!joinReq) return null;
+  const ownerId = joinReq.ownerUserId || joinReq.driverId || "";
   return {
-    id: joinReq._id.toString(),
-    rideOfferId: joinReq.rideOfferId.toString(),
-    ownerUserId: joinReq.ownerUserId.toString(),
+    id: joinReq._id ? joinReq._id.toString() : "",
+    rideOfferId: joinReq.rideOfferId ? joinReq.rideOfferId.toString() : "",
+    ownerUserId: ownerId ? ownerId.toString() : "",
     status: joinReq.status,
     requestNote: joinReq.requestNote || "",
     requestedAt: joinReq.requestedAt,

@@ -1,22 +1,50 @@
 import { useState } from "react";
-import { Search, MapPin, Calendar, Clock } from "lucide-react";
+import { Search, MapPin, CalendarDays, Clock3 } from "lucide-react";
 import { AppShell } from "../components/AppShell";
 import { LoadingWindow } from "../components/LoadingWindow";
+import { PickerField } from "../components/PickerField";
 import { api } from "../services/api";
 
-const TIME_WINDOWS = [
-  "Any time",
-  "6:00 AM - 7:00 AM",
-  "7:00 AM - 8:00 AM",
-  "7:30 AM - 8:30 AM",
-  "8:00 AM - 9:00 AM",
-  "8:30 AM - 9:30 AM",
-  "9:00 AM - 10:00 AM",
-  "4:00 PM - 5:00 PM",
-  "5:00 PM - 6:00 PM",
-  "5:30 PM - 6:30 PM",
-  "6:00 PM - 7:00 PM"
-];
+// ── Date options: identical logic to RideCreatePage ──────────────────────────
+const DATE_OPTIONS = createDateOptions();
+
+function createDateOptions() {
+  const formatter = new Intl.DateTimeFormat("en", { weekday: "long", month: "short", day: "numeric" });
+  return Array.from({ length: 14 }, (_, index) => {
+    const date = new Date();
+    date.setDate(date.getDate() + index);
+    if (index === 0) return "Today";
+    if (index === 1) return "Tomorrow";
+    return formatter.format(date);
+  });
+}
+
+// ── Time window options: identical logic to RideCreatePage ───────────────────
+const TIME_WINDOW_OPTIONS = createTimeWindowOptions();
+
+function formatTime(date) {
+  return date.toLocaleTimeString("en", { hour: "numeric", minute: "2-digit" });
+}
+
+function createTimeWindowOptions() {
+  const options = [];
+  const date = new Date();
+  date.setHours(6, 0, 0, 0);
+  const end = new Date(date);
+  end.setHours(20, 0, 0, 0);
+  while (date <= end) {
+    const start = new Date(date);
+    const finish = new Date(date);
+    finish.setMinutes(finish.getMinutes() + 60);
+    options.push(`${formatTime(start)} - ${formatTime(finish)}`);
+    date.setMinutes(date.getMinutes() + 30);
+  }
+  return options;
+}
+
+// "Any date" / "Any time" sentinel values (empty string = no filter applied)
+const DATE_PICKER_OPTIONS = ["Any date", ...DATE_OPTIONS];
+const TIME_WINDOW_PICKER_OPTIONS = ["Any time", ...TIME_WINDOW_OPTIONS];
 
 function StatusBadge({ status }) {
   const cls = status === "Active" ? "badge green" : "badge neutral";
@@ -29,7 +57,10 @@ export function SearchRidePage(props) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const set = (field) => (e) => setForm((f) => ({ ...f, [field]: e.target.value }));
+  const setField = (field) => (value) => setForm((f) => ({ ...f, [field]: value }));
+
+  // For plain text inputs (origin / destination) onChange still gives an event
+  const setInput = (field) => (e) => setForm((f) => ({ ...f, [field]: e.target.value }));
 
   const handleSearch = async (e) => {
     e.preventDefault();
@@ -39,7 +70,7 @@ export function SearchRidePage(props) {
       const data = await api.searchRides({
         origin: form.origin,
         destination: form.destination,
-        date: form.date,
+        date: form.date === "Any date" ? "" : form.date,
         timeWindow: form.timeWindow === "Any time" ? "" : form.timeWindow
       });
       setResults(data.offers || []);
@@ -65,6 +96,8 @@ export function SearchRidePage(props) {
       <article className="panel search-form-panel">
         <form className="search-form" onSubmit={handleSearch} id="search-ride-form">
           <div className="search-fields">
+
+            {/* From */}
             <div className="search-field-wrap">
               <label className="search-label" htmlFor="search-origin">
                 <MapPin size={14} />
@@ -76,10 +109,12 @@ export function SearchRidePage(props) {
                   type="text"
                   placeholder="e.g. Maharagama"
                   value={form.origin}
-                  onChange={set("origin")}
+                  onChange={setInput("origin")}
                 />
               </div>
             </div>
+
+            {/* To */}
             <div className="search-field-wrap">
               <label className="search-label" htmlFor="search-destination">
                 <MapPin size={14} />
@@ -91,45 +126,37 @@ export function SearchRidePage(props) {
                   type="text"
                   placeholder="e.g. ICBT Campus"
                   value={form.destination}
-                  onChange={set("destination")}
+                  onChange={setInput("destination")}
                 />
               </div>
             </div>
-            <div className="search-field-wrap">
-              <label className="search-label" htmlFor="search-date">
-                <Calendar size={14} />
-                Date
-              </label>
-              <div className="input-wrap">
-                <input
-                  id="search-date"
-                  type="text"
-                  placeholder="e.g. Tomorrow, Friday"
-                  value={form.date}
-                  onChange={set("date")}
-                />
-              </div>
+
+            {/* Date – custom PickerField */}
+            <div className="search-field-wrap search-picker-wrap">
+              <PickerField
+                label="Date"
+                icon={<CalendarDays size={18} />}
+                value={form.date}
+                placeholder="Any date"
+                options={DATE_PICKER_OPTIONS}
+                onChange={setField("date")}
+              />
             </div>
-            <div className="search-field-wrap">
-              <label className="search-label" htmlFor="search-time-window">
-                <Clock size={14} />
-                Time Window
-              </label>
-              <div className="input-wrap">
-                <select
-                  id="search-time-window"
-                  value={form.timeWindow}
-                  onChange={set("timeWindow")}
-                  className="search-select"
-                >
-                  <option value="">Any time</option>
-                  {TIME_WINDOWS.map((tw) => (
-                    <option key={tw} value={tw}>{tw}</option>
-                  ))}
-                </select>
-              </div>
+
+            {/* Time Window – custom PickerField */}
+            <div className="search-field-wrap search-picker-wrap">
+              <PickerField
+                label="Time Window"
+                icon={<Clock3 size={18} />}
+                value={form.timeWindow}
+                placeholder="Any time"
+                options={TIME_WINDOW_PICKER_OPTIONS}
+                onChange={setField("timeWindow")}
+              />
             </div>
+
           </div>
+
           <button id="search-ride-submit" type="submit" className="primary-button search-submit-btn" disabled={loading}>
             <Search size={16} />
             {loading ? "Searching…" : "Search Rides"}

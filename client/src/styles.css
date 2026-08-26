@@ -1001,6 +1001,32 @@
     @apply min-w-0 flex-1 appearance-none border-0 bg-transparent text-sm text-brand-ink shadow-none outline-none;
   }
 
+  /* Makes a PickerField blend into the search form column layout */
+  .search-picker-wrap {
+    @apply grid gap-2;
+  }
+
+  .search-picker-wrap .picker-field {
+    @apply mb-0;
+  }
+
+  .search-picker-wrap .picker-field > span:first-child {
+    @apply inline-flex items-center gap-1.5 text-sm font-normal text-brand-muted;
+  }
+
+  .search-picker-wrap .picker-wrap {
+    @apply w-full;
+  }
+
+  .search-picker-wrap .picker-trigger {
+    @apply w-full font-normal;
+  }
+
+  .search-picker-wrap .picker-value,
+  .search-picker-wrap .picker-placeholder {
+    @apply font-normal;
+  }
+
   .search-submit-btn {
     @apply inline-flex items-center gap-2 sm:w-fit;
   }
