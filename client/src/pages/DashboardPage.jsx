@@ -7,15 +7,27 @@ import { api } from "../services/api";
 
 export function DashboardPage(props) {
   const [dashboard, setDashboard] = useState(null);
-  const firstName = props.profile.firstName;
+  const [error, setError] = useState("");
+  const firstName = props.profile?.firstName || props.user?.name?.split(" ")[0] || "User";
 
   useEffect(() => {
-    api.dashboard().then(setDashboard);
+    let isMounted = true;
+    api.dashboard()
+      .then((data) => {
+        if (isMounted) setDashboard(data);
+      })
+      .catch((err) => {
+        if (isMounted) {
+          setError(err.message || "Failed to load dashboard");
+          setDashboard({
+            stats: { activeRides: 0, pendingRequests: 0, availableSeats: 0, upcomingJourneys: 0 },
+            currentRide: null,
+            activities: []
+          });
+        }
+      });
+    return () => { isMounted = false; };
   }, []);
-
-  const stats = dashboard?.stats || {};
-  const ride = dashboard?.currentRide;
-  const activity = dashboard?.activities?.[0];
 
   if (!dashboard) {
     return (
@@ -24,6 +36,10 @@ export function DashboardPage(props) {
       </AppShell>
     );
   }
+
+  const stats = dashboard?.stats || {};
+  const ride = dashboard?.currentRide;
+  const activity = dashboard?.activities?.[0];
 
   return (
     <AppShell {...props}>
@@ -65,8 +81,8 @@ export function DashboardPage(props) {
         <article className="panel action-panel">
           <h3>Quick Actions</h3>
           <button className="primary-button" type="button" onClick={() => props.setView("createRide")}>+ Create / Offer Ride</button>
-          <button className="secondary-button" type="button">Find a Ride</button>
-          <button className="secondary-button" type="button">View Requests</button>
+          <button id="dashboard-find-ride-btn" className="secondary-button" type="button" onClick={() => props.setView("find")}>Find a Ride</button>
+          <button id="dashboard-view-requests-btn" className="secondary-button" type="button" onClick={() => props.setView("myRequests")}>View My Requests</button>
         </article>
       </section>
       <section className="activity">

@@ -1,8 +1,8 @@
 import { ObjectId } from "mongodb";
 import { connectToDatabase } from "./db.js";
 import { createToken, hashPassword, requireAuth, verifyPassword } from "./auth.js";
-import { toProfile, toPublicUser, toRideOffer } from "./serializers.js";
-import { validateEmail, validatePassword, validateProfileUpdate, validateRegistration, validateRideOffer } from "./validators.js";
+import { toProfile, toPublicUser, toRideOffer, toPublicRideOffer, toJoinRequest } from "./serializers.js";
+import { validateEmail, validatePassword, validateProfileUpdate, validateRegistration, validateRideOffer, validateJoinRequest, buildSearchQuery } from "./validators.js";
 
 const asyncRoute = (handler) => (req, res, next) => {
   Promise.resolve(handler(req, res, next)).catch(next);
@@ -134,13 +134,13 @@ export function registerRoutes(app) {
   app.get("/api/dashboard", requireAuth, asyncRoute(async (req, res) => {
     const db = await connectToDatabase();
     const allActiveOffers = await db.collection("rideOffers").find({
-      driverId: req.user._id,
+      userId: req.user._id,
       status: "Active"
     }).sort({ createdAt: -1 }).toArray();
     const seededActiveOffers = allActiveOffers.filter((offer) => offer.seedKey);
     const activeOffers = seededActiveOffers.length ? seededActiveOffers : allActiveOffers;
     const pendingRequests = await db.collection("joinRequests").countDocuments({
-      driverId: req.user._id,
+      ownerUserId: req.user._id,
       status: "Pending"
     });
     const activities = await db.collection("activities").find({ userId: req.user._id })
@@ -170,7 +170,7 @@ export function registerRoutes(app) {
   app.get("/api/ride-offers/active", requireAuth, asyncRoute(async (req, res) => {
     const db = await connectToDatabase();
     const offers = await db.collection("rideOffers").find({
-      driverId: req.user._id,
+      userId: req.user._id,
       status: "Active"
     }).sort({ createdAt: -1 }).toArray();
     res.json({ offers: offers.map(toRideOffer) });
@@ -178,7 +178,7 @@ export function registerRoutes(app) {
 
   app.get("/api/ride-offers/draft", requireAuth, asyncRoute(async (req, res) => {
     const db = await connectToDatabase();
-    const draft = await db.collection("rideOfferDrafts").findOne({ driverId: req.user._id });
+    const draft = await db.collection("rideOfferDrafts").findOne({ userId: req.user._id });
     if (!draft) return res.json({ draft: null });
 
     res.json({
@@ -193,13 +193,51 @@ export function registerRoutes(app) {
     });
   }));
 
+  // ── Sprint 2: S2-T05 ──────────────────────────────────────────────────────────
+  // Search active ride offers — registered BEFORE /:id so Express doesn't match "search" as an ID
+  app.get("/api/ride-offers/search", requireAuth, asyncRoute(async (req, res) => {
+    const db = await connectToDatabase();
+    const searchFilter = buildSearchQuery(req.query);
+    const filter = {
+      ...searchFilter,
+      status: "Active",
+      availableSeats: { $gt: 0 }
+    };
+    const allOffers = await db.collection("rideOffers").find(filter).sort({ createdAt: -1 }).toArray();
+    const offers = allOffers.filter((o) => (o.userId || o.driverId)?.toString() !== req.user._id.toString());
+    if (!offers.length) {
+      return res.json({ offers: [], message: "No matching rides found for your search criteria." });
+    }
+    const userIds = [...new Set(offers.map((o) => o.userId || o.driverId).filter(Boolean))];
+    const profiles = await db.collection("profiles").find({ userId: { $in: userIds } }).toArray();
+    const profileByUserId = new Map(profiles.map((p) => [p.userId.toString(), p]));
+    const serialized = offers.map((offer) => {
+      const ownerId = (offer.userId || offer.driverId || "").toString();
+      const ownerProfile = profileByUserId.get(ownerId);
+      return toPublicRideOffer(offer, ownerProfile);
+    });
+    res.json({ offers: serialized });
+  }));
+
+  // ── Sprint 2: S2-T06 ──────────────────────────────────────────────────────────
+  // Public offer detail — registered BEFORE /:id
+  app.get("/api/ride-offers/public/:id", requireAuth, asyncRoute(async (req, res) => {
+    if (!ObjectId.isValid(req.params.id)) return res.status(400).json({ message: "Invalid ride offer id." });
+    const db = await connectToDatabase();
+    const offer = await db.collection("rideOffers").findOne({ _id: new ObjectId(req.params.id) });
+    if (!offer) return res.status(404).json({ message: "Ride offer not found." });
+    const ownerId = offer.userId || offer.driverId;
+    const ownerProfile = ownerId ? await db.collection("profiles").findOne({ userId: ownerId }) : null;
+    res.json({ offer: toPublicRideOffer(offer, ownerProfile) });
+  }));
+
   app.get("/api/ride-offers/:id", requireAuth, asyncRoute(async (req, res) => {
     if (!ObjectId.isValid(req.params.id)) return res.status(400).json({ message: "Invalid ride offer id." });
 
     const db = await connectToDatabase();
     const offer = await db.collection("rideOffers").findOne({
       _id: new ObjectId(req.params.id),
-      driverId: req.user._id
+      $or: [{ userId: req.user._id }, { driverId: req.user._id }]
     });
     if (!offer) return res.status(404).json({ message: "Ride offer not found." });
 
@@ -213,7 +251,7 @@ export function registerRoutes(app) {
 
     const db = await connectToDatabase();
     const offer = {
-      driverId: req.user._id,
+      userId: req.user._id,
       origin: req.body.origin.trim(),
       destination: req.body.destination.trim(),
       departureDate: req.body.departureDate.trim(),
@@ -235,5 +273,78 @@ export function registerRoutes(app) {
     const db = await connectToDatabase();
     const profile = await db.collection("profiles").findOne({ userId: new ObjectId(req.params.id) });
     res.json({ profile: toProfile(profile) });
+  }));
+
+  // ── Sprint 2: S2-T07 ─────────────────────────────────────────────────────────
+  // Create a join request for a ride offer.
+  app.post("/api/join-requests", requireAuth, asyncRoute(async (req, res) => {
+    const validationErrors = validateJoinRequest(req.body);
+    if (Object.keys(validationErrors).length) {
+      return res.status(400).json({ message: "Invalid request details.", errors: validationErrors });
+    }
+    if (!ObjectId.isValid(req.body.rideOfferId)) {
+      return res.status(400).json({ message: "Invalid ride offer ID." });
+    }
+
+    const db = await connectToDatabase();
+    const rideOfferId = new ObjectId(req.body.rideOfferId);
+    const offer = await db.collection("rideOffers").findOne({ _id: rideOfferId });
+
+    if (!offer) return res.status(404).json({ message: "Ride offer not found." });
+    if (offer.status !== "Active" || offer.availableSeats <= 0) {
+      return res.status(422).json({ message: "This ride offer is not available for requests." });
+    }
+    const ownerIdStr = (offer.userId || offer.driverId || "").toString();
+    if (ownerIdStr === req.user._id.toString()) {
+      return res.status(422).json({ message: "You cannot request to join your own ride offer." });
+    }
+
+    const duplicate = await db.collection("joinRequests").findOne({
+      rideOfferId,
+      requesterUserId: req.user._id,
+      status: "Pending"
+    });
+    if (duplicate) {
+      return res.status(409).json({ message: "You already have a pending request for this ride offer." });
+    }
+
+    const now = new Date();
+    const joinRequestDoc = {
+      rideOfferId,
+      requesterUserId: req.user._id,
+      ownerUserId: offer.userId || offer.driverId,
+      status: "Pending",
+      requestNote: req.body.requestNote?.trim() || "",
+      requestedAt: now,
+      updatedAt: now
+    };
+    const result = await db.collection("joinRequests").insertOne(joinRequestDoc);
+    res.status(201).json({
+      joinRequest: toJoinRequest({ ...joinRequestDoc, _id: result.insertedId }, offer)
+    });
+  }));
+
+  // ── Sprint 2: S2-T08 ─────────────────────────────────────────────────────────
+  // View own join requests — filters strictly to requesterUserId === authenticated user.
+  // Cross-user records cannot be accessed (UT-S2-10).
+  app.get("/api/join-requests/mine", requireAuth, asyncRoute(async (req, res) => {
+    const db = await connectToDatabase();
+    const requests = await db.collection("joinRequests")
+      .find({ requesterUserId: req.user._id })
+      .sort({ requestedAt: -1 })
+      .toArray();
+
+    if (!requests.length) return res.json({ joinRequests: [] });
+
+    // Embed offer summary for each request
+    const offerIds = [...new Set(requests.map((r) => r.rideOfferId))];
+    const offers = await db.collection("rideOffers").find({ _id: { $in: offerIds } }).toArray();
+    const offersById = new Map(offers.map((o) => [o._id.toString(), o]));
+
+    const serialized = requests.map((r) => {
+      const offer = offersById.get(r.rideOfferId.toString());
+      return toJoinRequest(r, offer);
+    });
+    res.json({ joinRequests: serialized });
   }));
 }

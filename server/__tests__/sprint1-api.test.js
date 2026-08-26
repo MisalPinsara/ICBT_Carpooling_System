@@ -1,6 +1,7 @@
 import { jest } from "@jest/globals";
 import { ObjectId } from "mongodb";
 import request from "supertest";
+import { createFakeDb } from "./testHelpers.js";
 
 let testDb;
 
@@ -13,95 +14,6 @@ const { createApp } = await import("../app.js");
 const { createToken, hashPassword } = await import("../auth.js");
 
 const app = createApp();
-
-class FakeCursor {
-  constructor(docs) {
-    this.docs = [...docs];
-  }
-
-  sort(sortSpec) {
-    const [[field, direction]] = Object.entries(sortSpec);
-    this.docs.sort((left, right) => {
-      const leftValue = left[field] instanceof Date ? left[field].getTime() : left[field];
-      const rightValue = right[field] instanceof Date ? right[field].getTime() : right[field];
-      if (leftValue === rightValue) return 0;
-      return leftValue > rightValue ? direction : -direction;
-    });
-    return this;
-  }
-
-  limit(count) {
-    this.docs = this.docs.slice(0, count);
-    return this;
-  }
-
-  async toArray() {
-    return this.docs;
-  }
-}
-
-class FakeCollection {
-  constructor(docs = []) {
-    this.docs = docs;
-  }
-
-  async findOne(filter) {
-    return this.docs.find((doc) => matchesFilter(doc, filter)) || null;
-  }
-
-  find(filter = {}) {
-    return new FakeCursor(this.docs.filter((doc) => matchesFilter(doc, filter)));
-  }
-
-  async insertOne(doc) {
-    const insertedId = doc._id || new ObjectId();
-    this.docs.push({ ...doc, _id: insertedId });
-    return { insertedId };
-  }
-
-  async updateOne(filter, update) {
-    const doc = this.docs.find((item) => matchesFilter(item, filter));
-    if (!doc) return { matchedCount: 0, modifiedCount: 0 };
-    Object.assign(doc, update.$set || {});
-    return { matchedCount: 1, modifiedCount: 1 };
-  }
-
-  async countDocuments(filter = {}) {
-    return this.docs.filter((doc) => matchesFilter(doc, filter)).length;
-  }
-}
-
-function getValue(doc, key) {
-  return key.split(".").reduce((value, part) => value?.[part], doc);
-}
-
-function valuesEqual(left, right) {
-  if (left instanceof ObjectId || right instanceof ObjectId) return left?.toString() === right?.toString();
-  return left === right;
-}
-
-function matchesFilter(doc, filter) {
-  return Object.entries(filter).every(([key, expected]) => {
-    const actual = getValue(doc, key);
-    if (expected && typeof expected === "object" && "$in" in expected) {
-      return expected.$in.some((value) => valuesEqual(actual, value));
-    }
-    return valuesEqual(actual, expected);
-  });
-}
-
-function createFakeDb(collections) {
-  const collectionMap = new Map(
-    Object.entries(collections).map(([name, docs]) => [name, new FakeCollection(docs)])
-  );
-
-  return {
-    collection(name) {
-      if (!collectionMap.has(name)) collectionMap.set(name, new FakeCollection());
-      return collectionMap.get(name);
-    }
-  };
-}
 
 function registrationPayload(overrides = {}) {
   return {
@@ -160,7 +72,7 @@ describe("Sprint 1 API unit tests", () => {
     };
     driverOffer = {
       _id: new ObjectId(),
-      driverId: driver._id,
+      userId: driver._id,
       origin: "Maharagama",
       destination: "ICBT Campus",
       departureDate: "Tomorrow",
@@ -173,7 +85,7 @@ describe("Sprint 1 API unit tests", () => {
     };
     otherDriverOffer = {
       _id: new ObjectId(),
-      driverId: otherDriver._id,
+      userId: otherDriver._id,
       origin: "Nugegoda",
       destination: "ICBT Campus",
       departureDate: "Friday",
@@ -382,18 +294,18 @@ describe("Sprint 1 API unit tests", () => {
     expect(response.body.errors.destination).toBe("Destination is required.");
   });
 
-  test("UT-14 links a created ride offer to the authenticated driver", async () => {
+  test("UT-14 links a created ride offer to the authenticated user", async () => {
     const response = await request(app)
       .post("/api/ride-offers")
       .set("Authorization", `Bearer ${driverToken}`)
       .send(ridePayload());
 
     expect(response.status).toBe(201);
-    expect(response.body.offer.driverId).toBe(driver._id.toString());
+    expect(response.body.offer.userId).toBe(driver._id.toString());
     expect(response.body.offer.status).toBe("Active");
   });
 
-  test("UT-15 returns only active offers for the authenticated driver", async () => {
+  test("UT-15 returns only active offers for the authenticated user", async () => {
     const response = await request(app)
       .get("/api/ride-offers/active")
       .set("Authorization", `Bearer ${driverToken}`);
@@ -401,7 +313,7 @@ describe("Sprint 1 API unit tests", () => {
     expect(response.status).toBe(200);
     expect(response.body.offers).toHaveLength(1);
     expect(response.body.offers[0].id).toBe(driverOffer._id.toString());
-    expect(response.body.offers[0].driverId).toBe(driver._id.toString());
+    expect(response.body.offers[0].userId).toBe(driver._id.toString());
     expect(response.body.offers[0].status).toBe("Active");
   });
 
@@ -412,7 +324,7 @@ describe("Sprint 1 API unit tests", () => {
       .send(ridePayload());
 
     expect(response.status).toBe(201);
-    expect(response.body.offer.driverId).toBe(passenger._id.toString());
+    expect(response.body.offer.userId).toBe(passenger._id.toString());
     expect(response.body.offer.status).toBe("Active");
   });
 

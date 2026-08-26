@@ -974,4 +974,176 @@
   .edit-actions {
     @apply mt-2 flex flex-col justify-end gap-3 sm:flex-row sm:gap-5;
   }
+
+  /* ── Sprint 2: Search Ride ─────────────────────────────────────────────────── */
+
+  .search-form-panel {
+    @apply mb-4 p-4 sm:p-5 lg:p-6;
+  }
+
+  .search-form {
+    @apply grid gap-4;
+  }
+
+  .search-fields {
+    @apply grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4;
+  }
+
+  .search-field-wrap {
+    @apply grid gap-2;
+  }
+
+  .search-label {
+    @apply inline-flex items-center gap-1.5 text-sm font-normal text-brand-muted;
+  }
+
+  .search-select {
+    @apply min-w-0 flex-1 appearance-none border-0 bg-transparent text-sm text-brand-ink shadow-none outline-none;
+  }
+
+  /* Makes a PickerField blend into the search form column layout */
+  .search-picker-wrap {
+    @apply grid gap-2;
+  }
+
+  .search-picker-wrap .picker-field {
+    @apply mb-0;
+  }
+
+  .search-picker-wrap .picker-field > span:first-child {
+    @apply inline-flex items-center gap-1.5 text-sm font-normal text-brand-muted;
+  }
+
+  .search-picker-wrap .picker-wrap {
+    @apply w-full;
+  }
+
+  .search-picker-wrap .picker-trigger {
+    @apply w-full font-normal;
+  }
+
+  .search-picker-wrap .picker-value,
+  .search-picker-wrap .picker-placeholder {
+    @apply font-normal;
+  }
+
+  .search-submit-btn {
+    @apply inline-flex items-center gap-2 sm:w-fit;
+  }
+
+  .search-results {
+    @apply grid gap-3;
+  }
+
+  .search-results-title {
+    @apply mt-2 mb-3 text-base font-normal text-brand-muted sm:text-lg;
+  }
+
+  .offer-card-main {
+    @apply min-w-0 flex-1;
+  }
+
+  .offer-card-meta {
+    @apply flex shrink-0 flex-row items-center gap-2 sm:flex-col sm:items-end;
+  }
+
+  .seats-badge {
+    @apply inline-flex min-h-6 items-center rounded-full bg-blue-50 px-2.5 text-[10px] font-normal text-brand-blue sm:text-xs;
+  }
+
+  /* ── Sprint 2: Offer Detail ────────────────────────────────────────────────── */
+
+  .offer-public-detail {
+    @apply p-4 sm:p-5 lg:p-6;
+  }
+
+  .owner-summary-box {
+    @apply mt-5 inline-grid gap-1 rounded-lg border border-brand-line bg-[#f8fafc] px-4 py-3;
+  }
+
+  .owner-summary-box span {
+    @apply text-[11px] font-normal text-brand-muted sm:text-xs;
+  }
+
+  .owner-summary-box strong {
+    @apply block text-sm font-normal sm:text-base;
+  }
+
+  .request-success-box {
+    @apply grid place-items-center gap-3 rounded-lg border border-brand-green/30 bg-green-50 p-5 text-center;
+  }
+
+  .request-success-box strong {
+    @apply block text-base font-normal text-brand-green;
+  }
+
+  .request-success-box p {
+    @apply m-0 text-sm text-brand-muted;
+  }
+
+  .request-unavailable-box {
+    @apply flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-600;
+  }
+
+  .request-note-wrap {
+    @apply grid gap-3;
+  }
+
+  .request-note-textarea {
+    @apply w-full resize-none rounded-lg border border-[#d8e2ee] bg-white px-4 py-3 text-sm text-brand-ink placeholder:text-[#9aacbf] focus:border-brand-blue focus:outline-none focus:shadow-[0_0_0_3px_rgba(47,104,232,0.14)] transition;
+  }
+
+  .request-note-actions {
+    @apply flex flex-wrap gap-2;
+  }
+
+  /* ── Sprint 2: My Requests ─────────────────────────────────────────────────── */
+
+  .my-requests-list {
+    @apply gap-3;
+  }
+
+  .my-request-card {
+    @apply flex flex-col justify-between gap-3 p-3 sm:flex-row sm:items-center sm:p-4;
+  }
+
+  .my-request-main {
+    @apply min-w-0 flex-1;
+  }
+
+  .my-request-main h3 {
+    @apply m-0 break-words text-sm font-normal sm:text-base;
+  }
+
+  .request-offer-meta {
+    @apply m-0 mt-1 text-xs text-brand-muted sm:text-sm;
+  }
+
+  .request-note-preview {
+    @apply mt-2 text-xs text-brand-muted sm:text-sm;
+  }
+
+  .request-date {
+    @apply mt-1.5 text-[11px] text-brand-muted sm:text-xs;
+  }
+
+  .my-request-status {
+    @apply shrink-0;
+  }
+
+  .request-status-badge {
+    @apply inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-normal;
+  }
+
+  .request-status-pending {
+    @apply bg-amber-50 text-amber-600;
+  }
+
+  .request-status-accepted {
+    @apply bg-green-50 text-brand-green;
+  }
+
+  .request-status-rejected {
+    @apply bg-red-50 text-red-600;
+  }
 }
