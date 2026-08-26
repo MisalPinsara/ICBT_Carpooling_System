@@ -68,6 +68,9 @@ export const api = {
   },
   myJoinRequests() {
     return this.request("/api/join-requests/mine");
+  },
+  getJoinRequest(id) {
+    return this.request(`/api/join-requests/${id}`);
   }
 };
 

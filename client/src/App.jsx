@@ -14,6 +14,7 @@ import { EmptyStatePage } from "./pages/EmptyStatePage";
 import { SearchRidePage } from "./pages/SearchRidePage";
 import { OfferDetailPage } from "./pages/OfferDetailPage";
 import { MyRequestsPage } from "./pages/MyRequestsPage";
+import { RequestDetailsPage } from "./pages/RequestDetailsPage";
 import { LoadingWindow } from "./components/LoadingWindow";
 import { api } from "./services/api";
 
@@ -29,6 +30,7 @@ const viewPaths = {
   editProfile: "/profile/edit",
   myRequests: "/join-requests",
   requests: "/join-requests",
+  requestDetails: "/join-requests/details",
   find: "/find-a-ride",
   offerDetail: "/find-a-ride/detail",
   messages: "/messages",
@@ -39,6 +41,7 @@ const viewPaths = {
 
 function viewFromPath(pathname) {
   if (pathname.startsWith("/my-ride-offers/") && pathname !== "/my-ride-offers/review" && pathname !== "/my-ride-offers/published") return "rideDetails";
+  if (pathname.startsWith("/join-requests/") && pathname !== "/join-requests") return "requestDetails";
   if (pathname === "/my-ride-offers/review") return "reviewRide";
   if (pathname === "/my-ride-offers/published") return "rideCreated";
   if (pathname === "/find-a-ride/detail") return "offerDetail";
@@ -53,6 +56,7 @@ export function App() {
   const [selectedRideId, setSelectedRideId] = useState(() => sessionStorage.getItem("selectedRideOfferId") || "");
   const [detailBackView, setDetailBackView] = useState(() => sessionStorage.getItem("rideDetailsBackView") || "createRide");
   const [selectedPublicOfferId, setSelectedPublicOfferId] = useState(() => sessionStorage.getItem("selectedPublicOfferId") || "");
+  const [selectedRequestId, setSelectedRequestId] = useState(() => sessionStorage.getItem("selectedRequestId") || "");
   const view = viewFromPath(location.pathname);
 
   const navigate = (nextView) => {
@@ -108,6 +112,12 @@ export function App() {
     navigate("offerDetail");
   };
 
+  const openRequestDetails = (requestId) => {
+    setSelectedRequestId(requestId);
+    sessionStorage.setItem("selectedRequestId", requestId);
+    navigateTo(`/join-requests/${requestId}`);
+  };
+
   if (auth.loading) return <LoadingWindow text="Loading ICBT Carpool" fullPage />;
 
   if (!auth.user) {
@@ -132,6 +142,8 @@ export function App() {
     openRideDetails,
     selectedPublicOfferId,
     openPublicOfferDetail,
+    selectedRequestId,
+    openRequestDetails,
     updateAuth: (next) => setAuth((current) => ({ ...current, ...next }))
   };
 
@@ -149,6 +161,7 @@ export function App() {
       <Route path="/profile" element={<ProfilePage {...sharedProps} />} />
       <Route path="/profile/edit" element={<EditProfilePage {...sharedProps} />} />
       <Route path="/join-requests" element={<MyRequestsPage {...sharedProps} />} />
+      <Route path="/join-requests/:requestId" element={<RequestDetailsPage {...sharedProps} />} />
       <Route path="/find-a-ride" element={<SearchRidePage {...sharedProps} />} />
       <Route path="/find-a-ride/detail" element={<OfferDetailPage {...sharedProps} />} />
       <Route path="/messages" element={<EmptyStatePage {...sharedProps} view="messages" />} />

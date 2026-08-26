@@ -80,7 +80,14 @@ export function MyRequestsPage(props) {
       {!error && requests && requests.length > 0 && (
         <div className="offers-list my-requests-list">
           {requests.map((req) => (
-            <article key={req.id} id={`request-card-${req.id}`} className="panel my-request-card">
+            <button
+              key={req.id}
+              id={`request-card-${req.id}`}
+              type="button"
+              className="panel my-request-card offer-card-button"
+              onClick={() => props.openRequestDetails ? props.openRequestDetails(req.id) : props.setView("requestDetails")}
+              style={{ textAlign: "left", width: "100%", cursor: "pointer" }}
+            >
               <div className="my-request-main">
                 {req.offer ? (
                   <>
@@ -111,7 +118,7 @@ export function MyRequestsPage(props) {
               <div className="my-request-status">
                 <RequestStatusBadge status={req.status} />
               </div>
-            </article>
+            </button>
           ))}
         </div>
       )}
