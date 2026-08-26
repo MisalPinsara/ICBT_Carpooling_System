@@ -157,12 +157,12 @@ export function registerRoutes(app) {
         upcomingJourneys: activeOffers.length + pendingRequests
       },
       currentRide: activeOffers[0] ? toRideOffer(activeOffers[0]) : null,
-      activities: activities.map((activity) => ({
-        id: activity._id.toString(),
-        title: activity.title,
-        route: activity.route,
-        status: activity.status,
-        createdLabel: activity.createdLabel
+      activities: (activities || []).map((activity) => ({
+        id: activity._id ? activity._id.toString() : "",
+        title: activity.title || "",
+        route: activity.route || "",
+        status: activity.status || "",
+        createdLabel: activity.createdLabel || ""
       }))
     });
   }));
@@ -346,5 +346,26 @@ export function registerRoutes(app) {
       return toJoinRequest(r, offer);
     });
     res.json({ joinRequests: serialized });
+  }));
+
+  // Fetch single join request detail by ID (must belong to requester or owner)
+  app.get("/api/join-requests/:id", requireAuth, asyncRoute(async (req, res) => {
+    if (!ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ message: "Invalid join request ID." });
+    }
+    const db = await connectToDatabase();
+    const joinReq = await db.collection("joinRequests").findOne({ _id: new ObjectId(req.params.id) });
+    if (!joinReq) return res.status(404).json({ message: "Join request not found." });
+
+    const requesterIdStr = (joinReq.requesterUserId || "").toString();
+    const ownerIdStr = (joinReq.ownerUserId || "").toString();
+    if (requesterIdStr !== req.user._id.toString() && ownerIdStr !== req.user._id.toString()) {
+      return res.status(403).json({ message: "You can only view your own join requests." });
+    }
+
+    const offer = await db.collection("rideOffers").findOne({ _id: joinReq.rideOfferId });
+    const ownerProfile = ownerIdStr ? await db.collection("profiles").findOne({ userId: new ObjectId(ownerIdStr) }) : null;
+
+    res.json({ joinRequest: toJoinRequest(joinReq, offer, ownerProfile) });
   }));
 }

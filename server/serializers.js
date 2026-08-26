@@ -64,8 +64,8 @@ export function toPublicRideOffer(offer, ownerSummary = null) {
   };
 }
 
-// Sprint 2: join-request serializer with embedded offer summary.
-export function toJoinRequest(joinReq, offerSummary = null) {
+// Sprint 2: join-request serializer with embedded offer summary and optional owner details.
+export function toJoinRequest(joinReq, offerSummary = null, ownerSummary = null) {
   if (!joinReq) return null;
   const ownerId = joinReq.ownerUserId || joinReq.driverId || "";
   return {
@@ -78,13 +78,18 @@ export function toJoinRequest(joinReq, offerSummary = null) {
     updatedAt: joinReq.updatedAt,
     offer: offerSummary
       ? {
+          id: offerSummary._id ? offerSummary._id.toString() : "",
           origin: offerSummary.origin,
           destination: offerSummary.destination,
           departureDate: offerSummary.departureDate,
           departureTime: offerSummary.departureTime,
           timeWindow: offerSummary.timeWindow,
+          availableSeats: offerSummary.availableSeats,
           status: offerSummary.status
         }
+      : null,
+    owner: ownerSummary
+      ? { firstName: ownerSummary.firstName, lastName: ownerSummary.lastName }
       : null
   };
 }
