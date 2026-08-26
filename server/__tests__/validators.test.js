@@ -3,7 +3,8 @@ import {
   validatePassword,
   validateProfileUpdate,
   validateRegistration,
-  validateRideOffer
+  validateRideOffer,
+  validateDecision
 } from "../validators.js";
 
 describe("Sprint 1 validation rules", () => {
@@ -49,5 +50,15 @@ describe("Sprint 1 validation rules", () => {
     });
 
     expect(errors.availableSeats).toBe("Available seats must be greater than zero.");
+  });
+
+  test("Sprint 3 validateDecision validates status correctly", () => {
+    expect(Object.keys(validateDecision({ status: "Accepted" }))).toHaveLength(0);
+    expect(Object.keys(validateDecision({ status: "Rejected" }))).toHaveLength(0);
+    expect(Object.keys(validateDecision({ status: "Cancelled" }))).toHaveLength(0);
+    expect(Object.keys(validateDecision({ decision: "accepted" }))).toHaveLength(0);
+    expect(validateDecision({ status: "Pending" }).status).toBeDefined();
+    expect(validateDecision({ status: "Invalid" }).status).toBeDefined();
+    expect(validateDecision({}).status).toBeDefined();
   });
 });

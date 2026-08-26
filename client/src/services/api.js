@@ -71,6 +71,25 @@ export const api = {
   },
   getJoinRequest(id) {
     return this.request(`/api/join-requests/${id}`);
+  },
+  // ── Sprint 3 ────────────────────────────────────────────────────────────────
+  receivedJoinRequests() {
+    return this.request("/api/join-requests/received");
+  },
+  acceptedPassengers(rideOfferId) {
+    return this.request(`/api/ride-offers/${rideOfferId}/accepted-passengers`);
+  },
+  decideJoinRequest(requestId, status, decisionNote = "") {
+    return this.request(`/api/join-requests/${requestId}/decision`, {
+      method: "PATCH",
+      body: JSON.stringify({ status, decisionNote })
+    });
+  },
+  cancelJoinRequest(requestId, reason = "") {
+    return this.request(`/api/join-requests/${requestId}/cancel`, {
+      method: "POST",
+      body: JSON.stringify({ reason })
+    });
   }
 };
 

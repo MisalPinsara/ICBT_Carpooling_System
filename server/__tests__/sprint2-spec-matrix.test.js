@@ -1,14 +1,5 @@
 /**
- * Sprint 2 TDD & Unit Test Suite Matrix
- * =====================================
- * Directly maps to:
- *   Section 6.3 TDD Test Cases (TDD-01 through TDD-08)
- *   Section 7   Unit Testing   (UT-01 through UT-08)
- *
- * Rules:
- *   - Each test case in the specification screenshot is conducted by its own standalone test script block.
- *   - No single test script combines multiple test cases.
- *   - All tests run against in-memory mock database using Supertest.
+ * Sprint 2 Test Matrix (TDD-01 to TDD-08, UT-01 to UT-08)
  */
 
 import { jest } from "@jest/globals";

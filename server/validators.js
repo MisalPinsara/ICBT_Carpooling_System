@@ -76,3 +76,14 @@ export function buildSearchQuery(params) {
   return filter;
 }
 
+// Sprint 3 — validates decision payload for a join-request.
+export function validateDecision(payload) {
+  const errors = {};
+  const status = (payload?.status || payload?.decision || payload?.action || "").trim();
+  const normalized = status.charAt(0).toUpperCase() + status.slice(1).toLowerCase();
+  if (!["Accepted", "Rejected", "Cancelled"].includes(normalized)) {
+    errors.status = "Decision status must be 'Accepted', 'Rejected', or 'Cancelled'.";
+  }
+  return errors;
+}
+
