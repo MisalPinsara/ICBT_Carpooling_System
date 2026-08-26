@@ -80,7 +80,7 @@ async function seed() {
   const rideSeeds = [
     {
       seedKey: "kasun-maharagama-campus",
-      driverId: kasun._id,
+      userId: kasun._id,
       origin: "Maharagama",
       destination: "ICBT Campus",
       departureDate: "Tomorrow",
@@ -93,7 +93,7 @@ async function seed() {
     },
     {
       seedKey: "kasun-nugegoda-campus",
-      driverId: kasun._id,
+      userId: kasun._id,
       origin: "Nugegoda",
       destination: "ICBT Campus",
       departureDate: "Friday",
@@ -106,7 +106,7 @@ async function seed() {
     },
     {
       seedKey: "kasun-campus-maharagama",
-      driverId: kasun._id,
+      userId: kasun._id,
       origin: "ICBT Campus",
       destination: "Maharagama",
       departureDate: "Monday",
@@ -135,11 +135,13 @@ async function seed() {
     {
       $set: {
         seedKey: "nethmi-primary-pending",
-        driverId: kasun._id,
-        passengerId: nethmi._id,
         rideOfferId: primaryRide._id,
+        requesterUserId: nethmi._id,
+        ownerUserId: kasun._id,
         status: "Pending",
-        createdAt: now
+        requestNote: "",
+        requestedAt: now,
+        updatedAt: now
       }
     },
     { upsert: true }
@@ -149,21 +151,23 @@ async function seed() {
     {
       $set: {
         seedKey: "nethmi-second-pending",
-        driverId: kasun._id,
-        passengerId: nethmi._id,
         rideOfferId: secondRide._id,
+        requesterUserId: nethmi._id,
+        ownerUserId: kasun._id,
         status: "Pending",
-        createdAt: now
+        requestNote: "",
+        requestedAt: now,
+        updatedAt: now
       }
     },
     { upsert: true }
   );
 
   await db.collection("rideOfferDrafts").updateOne(
-    { driverId: kasun._id },
+    { userId: kasun._id },
     {
       $set: {
-        driverId: kasun._id,
+        userId: kasun._id,
         origin: "Maharagama",
         destination: "ICBT Campus",
         departureDate: "Tomorrow",

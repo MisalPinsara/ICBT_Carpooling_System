@@ -24,6 +24,10 @@
   },
   "jest": {
     "testEnvironment": "node",
-    "transform": {}
+    "transform": {},
+    "testPathIgnorePatterns": [
+      "/node_modules/",
+      "/__tests__/testHelpers\\.js$"
+    ]
   }
 }

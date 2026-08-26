@@ -63,18 +63,34 @@ export function RideCreatePage(props) {
   const [flash, setFlash] = useState(() => sessionStorage.getItem("rideOfferFlash") || "");
 
   useEffect(() => {
-    Promise.all([api.rideDraft(), api.activeRideOffers()]).then(([data, offerData]) => {
-      const ride = data.draft || {};
-      setForm({
-        origin: ride.origin || "",
-        destination: ride.destination || "",
-        departureDate: ride.departureDate || "",
-        departureTime: ride.departureTime || "",
-        timeWindow: ride.timeWindow || "",
-        availableSeats: ride.availableSeats || ""
+    let isMounted = true;
+    Promise.all([api.rideDraft(), api.activeRideOffers()])
+      .then(([data, offerData]) => {
+        if (!isMounted) return;
+        const ride = data?.draft || {};
+        setForm({
+          origin: ride.origin || "",
+          destination: ride.destination || "",
+          departureDate: ride.departureDate || "",
+          departureTime: ride.departureTime || "",
+          timeWindow: ride.timeWindow || "",
+          availableSeats: ride.availableSeats || ""
+        });
+        setOffers(Array.isArray(offerData?.offers) ? offerData.offers : []);
+      })
+      .catch(() => {
+        if (!isMounted) return;
+        setForm({
+          origin: "",
+          destination: "",
+          departureDate: "",
+          departureTime: "",
+          timeWindow: "",
+          availableSeats: ""
+        });
+        setOffers([]);
       });
-      setOffers(Array.isArray(offerData.offers) ? offerData.offers : []);
-    });
+    return () => { isMounted = false; };
   }, []);
 
   useEffect(() => {
