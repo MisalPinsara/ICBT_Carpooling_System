@@ -56,10 +56,18 @@ export function DashboardPage(props) {
       )}
 
       <section className="stat-grid">
-        <StatCard value={stats.activeRides ?? 0} label="Active rides" tone="blue" />
-        <StatCard value={stats.pendingRequests ?? 0} label="Pending requests" tone="amber" />
-        <StatCard value={stats.availableSeats ?? 0} label="Available seats" tone="green" />
-        <StatCard value={stats.upcomingJourneys ?? 0} label="Upcoming journeys" tone="cyan" />
+        <div style={{ cursor: "pointer" }} onClick={() => props.setView("myRequests")}>
+          <StatCard value={stats.activeRides ?? 0} label="Active rides" tone="blue" />
+        </div>
+        <div style={{ cursor: "pointer" }} onClick={() => props.setView("myRequests")}>
+          <StatCard value={stats.pendingRequests ?? 0} label="Pending requests" tone="amber" />
+        </div>
+        <div>
+          <StatCard value={stats.availableSeats ?? 0} label="Available seats" tone="green" />
+        </div>
+        <div>
+          <StatCard value={stats.upcomingJourneys ?? 0} label="Upcoming journeys" tone="cyan" />
+        </div>
       </section>
 
       <section className="dashboard-grid">
@@ -145,7 +153,13 @@ export function DashboardPage(props) {
               <strong>{activity.title}</strong>
               <p>{activity.route} • {activity.createdLabel}</p>
             </div>
-            <button className="primary-button compact" type="button">Review</button>
+            <button
+              className="primary-button compact"
+              type="button"
+              onClick={() => props.setView("myRequests")}
+            >
+              Review
+            </button>
           </article>
         </section>
       )}

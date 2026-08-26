@@ -64,18 +64,23 @@ export function toPublicRideOffer(offer, ownerSummary = null) {
   };
 }
 
-// Sprint 2: join-request serializer with embedded offer summary and optional owner details.
-export function toJoinRequest(joinReq, offerSummary = null, ownerSummary = null) {
+// Sprint 2 & 3: join-request serializer with embedded offer summary, owner details, and requester details.
+export function toJoinRequest(joinReq, offerSummary = null, ownerSummary = null, requesterSummary = null) {
   if (!joinReq) return null;
   const ownerId = joinReq.ownerUserId || joinReq.driverId || "";
+  const requesterId = joinReq.requesterUserId ? joinReq.requesterUserId.toString() : "";
   return {
     id: joinReq._id ? joinReq._id.toString() : "",
     rideOfferId: joinReq.rideOfferId ? joinReq.rideOfferId.toString() : "",
+    requesterUserId: requesterId,
     ownerUserId: ownerId ? ownerId.toString() : "",
     status: joinReq.status,
     requestNote: joinReq.requestNote || "",
     requestedAt: joinReq.requestedAt,
+    decidedAt: joinReq.decidedAt || null,
+    cancelledAt: joinReq.cancelledAt || null,
     updatedAt: joinReq.updatedAt,
+    decisionNote: joinReq.decisionNote || "",
     offer: offerSummary
       ? {
           id: offerSummary._id ? offerSummary._id.toString() : "",
@@ -90,6 +95,17 @@ export function toJoinRequest(joinReq, offerSummary = null, ownerSummary = null)
       : null,
     owner: ownerSummary
       ? { firstName: ownerSummary.firstName, lastName: ownerSummary.lastName }
+      : null,
+    requester: requesterSummary
+      ? {
+          id: requesterId,
+          name: requesterSummary.name || `${requesterSummary.firstName || ""} ${requesterSummary.lastName || ""}`.trim() || "Passenger",
+          firstName: requesterSummary.firstName || "",
+          lastName: requesterSummary.lastName || "",
+          phoneNumber: requesterSummary.phoneNumber || "",
+          email: requesterSummary.email || "",
+          studentStaffId: requesterSummary.studentStaffId || ""
+        }
       : null
   };
 }

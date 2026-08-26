@@ -13,7 +13,8 @@ const routeLabels = {
   requests: "Requests",
   find: "Find a Ride",
   offerDetail: "Find a Ride / Details",
-  myRequests: "My Requests",
+  myRequests: "Requests",
+  requestDetails: "Requests / Details",
   messages: "Messages",
   journeys: "Journeys",
   passengers: "Passengers"
@@ -22,12 +23,12 @@ const routeLabels = {
 function isActiveNav(view, key) {
   if (key === "createRide") return ["createRide", "rideDetails", "reviewRide", "rideCreated"].includes(view);
   if (key === "find") return ["find", "offerDetail"].includes(view);
-  if (key === "requests") return view === "myRequests";
+  if (key === "requests") return ["myRequests", "requestDetails"].includes(view);
   return view === key;
 }
 
 function handleNavClick(key, setView) {
-  // 'requests' nav item maps to the myRequests view for passengers
+  // 'requests' nav item maps to the myRequests view
   if (key === "requests") return setView("myRequests");
   setView(key);
 }
@@ -37,7 +38,7 @@ function getBackView(view, backViewOverride) {
   if (view === "reviewRide" || view === "rideCreated") return "createRide";
   if (view === "editProfile") return "profile";
   if (view === "offerDetail") return "find";
-  if (view === "myRequests") return "dashboard";
+  if (view === "myRequests" || view === "requestDetails") return null;
   if (view === "dashboard") return null;
   return "dashboard";
 }
@@ -48,7 +49,7 @@ export function AppShell({ user, view, setView, logout, detailBackView, children
   const menu = [
     ["dashboard", Home, "Dashboard"],
     ["createRide", Car, "My Ride Offers"],
-    ["requests", UsersRound, "Join Requests"],
+    ["requests", UsersRound, "Requests"],
     ["find", Search, "Find a Ride"],
     ["messages", MessageSquare, "Messages"],
     ["journeys", Clock3, "Journeys"],

@@ -48,7 +48,14 @@ export class FakeCollection {
   async updateOne(filter, update) {
     const doc = this.docs.find((item) => matchesFilter(item, filter));
     if (!doc) return { matchedCount: 0, modifiedCount: 0 };
-    Object.assign(doc, update.$set || {});
+    if (update.$set) {
+      Object.assign(doc, update.$set);
+    }
+    if (update.$inc) {
+      for (const [key, value] of Object.entries(update.$inc)) {
+        doc[key] = (Number(doc[key]) || 0) + Number(value);
+      }
+    }
     return { matchedCount: 1, modifiedCount: 1 };
   }
 

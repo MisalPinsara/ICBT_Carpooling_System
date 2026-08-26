@@ -133,6 +133,8 @@ function ridePayload(overrides = {}) {
   };
 }
 
+let validPasswordHash;
+
 describe("Sprint 1 API unit tests", () => {
   let driver;
   let passenger;
@@ -142,26 +144,30 @@ describe("Sprint 1 API unit tests", () => {
   let driverOffer;
   let otherDriverOffer;
 
-  beforeEach(async () => {
+  beforeAll(async () => {
+    validPasswordHash = await hashPassword("Password123");
+  });
+
+  beforeEach(() => {
     driver = {
       _id: new ObjectId(),
       name: "Kasun Fernando",
       email: "kasun@icbt.lk",
-      passwordHash: await hashPassword("Password123"),
+      passwordHash: validPasswordHash,
       createdAt: new Date("2026-08-01T08:00:00.000Z")
     };
     passenger = {
       _id: new ObjectId(),
       name: "Nethmi Perera",
       email: "nethmi@icbt.lk",
-      passwordHash: await hashPassword("Password123"),
+      passwordHash: validPasswordHash,
       createdAt: new Date("2026-08-01T08:05:00.000Z")
     };
     otherDriver = {
       _id: new ObjectId(),
       name: "Ravi Jayasuriya",
       email: "ravi@icbt.lk",
-      passwordHash: await hashPassword("Password123"),
+      passwordHash: validPasswordHash,
       createdAt: new Date("2026-08-01T08:10:00.000Z")
     };
     driverOffer = {
