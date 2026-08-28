@@ -15,8 +15,11 @@ import { SearchRidePage } from "./pages/SearchRidePage";
 import { OfferDetailPage } from "./pages/OfferDetailPage";
 import { MyRequestsPage } from "./pages/MyRequestsPage";
 import { RequestDetailsPage } from "./pages/RequestDetailsPage";
+import { MessagesPage } from "./pages/MessagesPage";
+import { JourneysPage } from "./pages/JourneysPage";
 import { LoadingWindow } from "./components/LoadingWindow";
 import { api } from "./services/api";
+
 
 const viewPaths = {
   login: "/login",
@@ -164,8 +167,9 @@ export function App() {
       <Route path="/join-requests/:requestId" element={<RequestDetailsPage {...sharedProps} />} />
       <Route path="/find-a-ride" element={<SearchRidePage {...sharedProps} />} />
       <Route path="/find-a-ride/detail" element={<OfferDetailPage {...sharedProps} />} />
-      <Route path="/messages" element={<EmptyStatePage {...sharedProps} view="messages" />} />
-      <Route path="/journeys" element={<EmptyStatePage {...sharedProps} view="journeys" />} />
+      <Route path="/messages" element={<MessagesPage {...sharedProps} />} />
+      <Route path="/journeys" element={<JourneysPage {...sharedProps} />} />
+
       <Route path="/passengers" element={<EmptyStatePage {...sharedProps} view="passengers" />} />
       <Route path="/my-rides" element={<EmptyStatePage {...sharedProps} view="rides" />} />
       <Route path="*" element={<Navigate to="/dashboard" replace />} />

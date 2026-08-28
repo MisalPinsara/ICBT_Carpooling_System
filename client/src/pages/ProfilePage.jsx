@@ -9,6 +9,8 @@ export function ProfilePage(props) {
   const { user, profile } = props;
   const initials = `${profile.firstName?.[0] || ""}${profile.lastName?.[0] || ""}`;
   const [showEdit, setShowEdit] = useState(false);
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+
   const [form, setForm] = useState({
     firstName: profile.firstName,
     lastName: profile.lastName,
@@ -19,6 +21,11 @@ export function ProfilePage(props) {
   const [error, setError] = useState("");
   const [fieldErrors, setFieldErrors] = useState({});
   const [flash, setFlash] = useState("");
+
+  const [pwdForm, setPwdForm] = useState({ currentPassword: "", newPassword: "", confirmPassword: "" });
+  const [pwdError, setPwdError] = useState("");
+  const [pwdFieldErrors, setPwdFieldErrors] = useState({});
+  const [pwdSubmitting, setPwdSubmitting] = useState(false);
 
   useEffect(() => {
     if (!flash) return undefined;
@@ -44,10 +51,39 @@ export function ProfilePage(props) {
       const data = await api.updateProfile(form);
       props.updateAuth(data);
       setShowEdit(false);
-      setFlash("profile updated successfully");
+      setFlash("Profile updated successfully.");
     } catch (err) {
       setError(err.message);
       setFieldErrors(err.details || {});
+    }
+  }
+
+  async function savePassword(event) {
+    event.preventDefault();
+    setPwdError("");
+    setPwdFieldErrors({});
+
+    const errors = {};
+    if (!pwdForm.currentPassword.trim()) errors.currentPassword = "Current password is required.";
+    if (!pwdForm.newPassword || pwdForm.newPassword.length < 8) errors.newPassword = "New password must be at least 8 characters.";
+    if (pwdForm.confirmPassword !== pwdForm.newPassword) errors.confirmPassword = "Passwords do not match.";
+
+    if (Object.keys(errors).length) {
+      setPwdFieldErrors(errors);
+      return;
+    }
+
+    setPwdSubmitting(true);
+    try {
+      await api.changePassword(pwdForm);
+      setShowPasswordModal(false);
+      setPwdForm({ currentPassword: "", newPassword: "", confirmPassword: "" });
+      setFlash("Password updated successfully.");
+    } catch (err) {
+      setPwdError(err.message || "Failed to update password.");
+      setPwdFieldErrors(err.details || {});
+    } finally {
+      setPwdSubmitting(false);
     }
   }
 
@@ -66,7 +102,7 @@ export function ProfilePage(props) {
             <p>{profile.accountType}</p>
             <div className="profile-actions">
               <button className="primary-button small" type="button" onClick={() => setShowEdit(true)}>Edit Profile</button>
-              <button className="secondary-button small" type="button">Change Password</button>
+              <button className="secondary-button small" type="button" onClick={() => setShowPasswordModal(true)}>Change Password</button>
             </div>
           </div>
         </div>
@@ -80,12 +116,13 @@ export function ProfilePage(props) {
           <Info label="Home Route" value={profile.homeRoute} wide />
         </div>
       </section>
+
       {showEdit && (
         <div className="modal-backdrop" role="presentation">
           <form className="modal-panel profile-edit-modal" role="dialog" aria-modal="true" aria-labelledby="profile-modal-title" onSubmit={save}>
             <div className="modal-heading">
               <div>
-                <h2 id="profile-modal-title">Edit profile</h2>
+                <h2 id="profile-modal-title">Edit Profile</h2>
                 <p>Update your personal details.</p>
               </div>
               <button className="modal-close" type="button" onClick={() => setShowEdit(false)} aria-label="Close">&times;</button>
@@ -95,9 +132,63 @@ export function ProfilePage(props) {
             <Field label="Email" value={form.email} onChange={() => {}} suffix="Account email" disabled />
             <Field label="Phone Number" value={form.phoneNumber} error={fieldErrors.phoneNumber} onChange={(value) => update("phoneNumber", value)} maxLength={10} inputMode="numeric" pattern="[0-9]*" />
             {error && <p className="form-error">{error}</p>}
-            <div className="edit-actions">
+            <div className="edit-actions" style={{ display: "flex", justifyContent: "flex-end", gap: "0.75rem", marginTop: "1rem" }}>
               <button className="secondary-button small" type="button" onClick={() => setShowEdit(false)}>Cancel</button>
               <button className="primary-button small" type="submit">Save Changes</button>
+            </div>
+          </form>
+        </div>
+      )}
+
+      {showPasswordModal && (
+        <div className="modal-backdrop" role="presentation">
+          <form className="modal-panel profile-edit-modal" role="dialog" aria-modal="true" aria-labelledby="pwd-modal-title" onSubmit={savePassword}>
+            <div className="modal-heading">
+              <div>
+                <h2 id="pwd-modal-title">Change Password</h2>
+                <p>Ensure your account remains secure with a strong password.</p>
+              </div>
+              <button className="modal-close" type="button" onClick={() => setShowPasswordModal(false)} aria-label="Close">&times;</button>
+            </div>
+            <Field
+              label="Current Password"
+              type="password"
+              value={pwdForm.currentPassword}
+              error={pwdFieldErrors.currentPassword}
+              onChange={(value) => {
+                setPwdForm((c) => ({ ...c, currentPassword: value }));
+                setPwdError("");
+                setPwdFieldErrors((c) => ({ ...c, currentPassword: "" }));
+              }}
+            />
+            <Field
+              label="New Password"
+              type="password"
+              value={pwdForm.newPassword}
+              error={pwdFieldErrors.newPassword}
+              onChange={(value) => {
+                setPwdForm((c) => ({ ...c, newPassword: value }));
+                setPwdError("");
+                setPwdFieldErrors((c) => ({ ...c, newPassword: "" }));
+              }}
+            />
+            <Field
+              label="Confirm New Password"
+              type="password"
+              value={pwdForm.confirmPassword}
+              error={pwdFieldErrors.confirmPassword}
+              onChange={(value) => {
+                setPwdForm((c) => ({ ...c, confirmPassword: value }));
+                setPwdError("");
+                setPwdFieldErrors((c) => ({ ...c, confirmPassword: "" }));
+              }}
+            />
+            {pwdError && <p className="validation-message" style={{ marginBottom: "1rem" }}>{pwdError}</p>}
+            <div className="edit-actions" style={{ display: "flex", justifyContent: "flex-end", gap: "0.75rem", marginTop: "1rem" }}>
+              <button className="secondary-button small" type="button" onClick={() => setShowPasswordModal(false)}>Cancel</button>
+              <button className="primary-button small" type="submit" disabled={pwdSubmitting}>
+                {pwdSubmitting ? "Updating..." : "Update Password"}
+              </button>
             </div>
           </form>
         </div>
@@ -105,3 +196,4 @@ export function ProfilePage(props) {
     </AppShell>
   );
 }
+

@@ -13,10 +13,13 @@ import {
   Users,
   CheckCircle2,
   AlertCircle,
-  Ban
+  Ban,
+  Edit3,
+  MessageSquare
 } from "lucide-react";
 import { AppShell } from "../components/AppShell";
 import { Info } from "../components/Info";
+import { Field } from "../components/Field";
 import { LoadingWindow } from "../components/LoadingWindow";
 import { api } from "../services/api";
 
@@ -28,6 +31,19 @@ export function RideDetailsPage(props) {
   const [actionError, setActionError] = useState("");
   const [actionSuccess, setActionSuccess] = useState("");
   const [submittingId, setSubmittingId] = useState(null);
+
+  // Edit offer modal state
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editForm, setEditForm] = useState({
+    origin: "",
+    destination: "",
+    departureDate: "",
+    departureTime: "",
+    timeWindow: "",
+    availableSeats: 1
+  });
+  const [editError, setEditError] = useState("");
+  const [editSubmitting, setEditSubmitting] = useState(false);
 
   const { rideId: routeRideId } = useParams();
   const rideId = routeRideId || props.selectedRideId || sessionStorage.getItem("selectedRideOfferId");
@@ -52,6 +68,17 @@ export function RideDetailsPage(props) {
         (r) => (r.rideOfferId || r.offer?.id) === rideId && r.status === "Pending"
       );
       setPendingRequests(rideRequests);
+
+      if (offerData.offer) {
+        setEditForm({
+          origin: offerData.offer.origin || "",
+          destination: offerData.offer.destination || "",
+          departureDate: offerData.offer.departureDate || "",
+          departureTime: offerData.offer.departureTime || "",
+          timeWindow: offerData.offer.timeWindow || "",
+          availableSeats: offerData.offer.availableSeats ?? 1
+        });
+      }
     } catch (err) {
       setError(err.message || "Failed to load ride details.");
     }
@@ -96,6 +123,49 @@ export function RideDetailsPage(props) {
     }
   };
 
+  const handleSaveEdit = async (e) => {
+    e.preventDefault();
+    setEditError("");
+    setEditSubmitting(true);
+    setActionSuccess("");
+    setActionError("");
+
+    try {
+      const updatedRes = await api.updateRideOffer(rideId, editForm);
+      setOffer(updatedRes.offer);
+      setShowEditModal(false);
+      setActionSuccess("Ride offer details updated successfully.");
+      await loadData();
+    } catch (err) {
+      setEditError(err.message || "Failed to update ride offer.");
+    } finally {
+      setEditSubmitting(false);
+    }
+  };
+
+  const handleCancelOffer = async () => {
+    if (!window.confirm("Are you sure you want to cancel this ride offer? Pending requests will be cancelled.")) {
+      return;
+    }
+    setActionError("");
+    setActionSuccess("");
+
+    try {
+      const res = await api.cancelRideOffer(rideId);
+      setOffer(res.offer);
+      setActionSuccess("Ride offer cancelled successfully.");
+      await loadData();
+    } catch (err) {
+      setActionError(err.message || "Failed to cancel ride offer.");
+    }
+  };
+
+  const openMessagePassenger = (passengerUserId) => {
+    sessionStorage.setItem("activeChatOfferId", rideId);
+    sessionStorage.setItem("activeChatPartnerId", passengerUserId);
+    props.setView("messages");
+  };
+
   if (!offer && !error) {
     return (
       <AppShell {...props}>
@@ -130,7 +200,7 @@ export function RideDetailsPage(props) {
         </section>
       ) : (
         <section className="panel ride-detail-panel">
-          <div className="ride-detail-heading">
+          <div className="ride-detail-heading" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <div>
               <h3>
                 <Car size={20} fill="#ef4444" color="#ef4444" style={{ display: "inline", marginRight: 6 }} />
@@ -138,8 +208,28 @@ export function RideDetailsPage(props) {
               </h3>
               <p>{offer.departureDate} • {offer.departureTime} • {offer.timeWindow}</p>
             </div>
-            <div className="ride-heading-actions">
+            <div className="ride-heading-actions" style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
               <span className={`badge ${isActive ? "green" : "neutral"}`}>{offer.status}</span>
+              {isActive && (
+                <>
+                  <button
+                    type="button"
+                    className="secondary-button compact"
+                    style={{ gap: 4 }}
+                    onClick={() => setShowEditModal(true)}
+                  >
+                    <Edit3 size={14} /> Edit Offer
+                  </button>
+                  <button
+                    type="button"
+                    className="danger-button compact"
+                    style={{ gap: 4 }}
+                    onClick={handleCancelOffer}
+                  >
+                    <Ban size={14} /> Cancel Offer
+                  </button>
+                </>
+              )}
             </div>
           </div>
           <hr />
@@ -177,10 +267,19 @@ export function RideDetailsPage(props) {
                             </div>
                           </div>
                           <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                            <button
+                              type="button"
+                              className="secondary-button compact"
+                              style={{ fontSize: "0.7rem", padding: "0.2rem 0.5rem", gap: 3 }}
+                              title="Message passenger"
+                              onClick={() => openMessagePassenger(passenger.id)}
+                            >
+                              <MessageSquare size={12} /> Chat
+                            </button>
                             <span className="badge green" style={{ fontSize: "0.7rem", padding: "0.2rem 0.5rem" }}>
                               CONFIRMED
                             </span>
-                            {passenger.requestId && (
+                            {passenger.requestId && isActive && (
                               <button
                                 type="button"
                                 className="btn-cancel-request"
@@ -269,6 +368,36 @@ export function RideDetailsPage(props) {
           </div>
         </section>
       )}
+
+      {/* Edit Offer Modal */}
+      {showEditModal && (
+        <div className="modal-backdrop" role="presentation">
+          <form className="modal-panel profile-edit-modal" role="dialog" aria-modal="true" aria-labelledby="edit-modal-title" onSubmit={handleSaveEdit}>
+            <div className="modal-heading">
+              <div>
+                <h2 id="edit-modal-title">Edit Ride Offer</h2>
+                <p>Update origin, destination, time, or available seats.</p>
+              </div>
+              <button className="modal-close" type="button" onClick={() => setShowEditModal(false)} aria-label="Close">&times;</button>
+            </div>
+            <Field label="Origin" value={editForm.origin} onChange={(v) => setEditForm((c) => ({ ...c, origin: v }))} />
+            <Field label="Destination" value={editForm.destination} onChange={(v) => setEditForm((c) => ({ ...c, destination: v }))} />
+            <Field label="Departure Date" type="date" value={editForm.departureDate} onChange={(v) => setEditForm((c) => ({ ...c, departureDate: v }))} />
+            <Field label="Departure Time" type="time" value={editForm.departureTime} onChange={(v) => setEditForm((c) => ({ ...c, departureTime: v }))} />
+            <Field label="Time Window" value={editForm.timeWindow} onChange={(v) => setEditForm((c) => ({ ...c, timeWindow: v }))} placeholder="e.g. 7:00 AM - 8:00 AM" />
+            <Field label="Available Seats" type="number" value={editForm.availableSeats} onChange={(v) => setEditForm((c) => ({ ...c, availableSeats: Number(v) }))} min={0} />
+
+            {editError && <p className="validation-message" style={{ marginBottom: "1rem" }}>{editError}</p>}
+            <div className="edit-actions" style={{ display: "flex", justifyContent: "flex-end", gap: "0.75rem", marginTop: "1rem" }}>
+              <button className="secondary-button small" type="button" onClick={() => setShowEditModal(false)}>Cancel</button>
+              <button className="primary-button small" type="submit" disabled={editSubmitting}>
+                {editSubmitting ? "Saving..." : "Save Changes"}
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
     </AppShell>
   );
-}
+}
+

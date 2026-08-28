@@ -109,3 +109,34 @@ export function toJoinRequest(joinReq, offerSummary = null, ownerSummary = null,
       : null
   };
 }
+
+// Sprint 4 — message serializer
+export function toMessage(msg, senderSummary = null, recipientSummary = null) {
+  if (!msg) return null;
+  return {
+    id: msg._id ? msg._id.toString() : "",
+    rideOfferId: msg.rideOfferId ? msg.rideOfferId.toString() : "",
+    joinRequestId: msg.joinRequestId ? msg.joinRequestId.toString() : null,
+    senderUserId: msg.senderUserId ? msg.senderUserId.toString() : "",
+    recipientUserId: msg.recipientUserId ? msg.recipientUserId.toString() : "",
+    content: msg.content || "",
+    createdAt: msg.createdAt,
+    sender: senderSummary
+      ? {
+          id: senderSummary.userId ? senderSummary.userId.toString() : senderSummary._id?.toString() || "",
+          name: senderSummary.name || `${senderSummary.firstName || ""} ${senderSummary.lastName || ""}`.trim() || "User",
+          firstName: senderSummary.firstName || "",
+          lastName: senderSummary.lastName || ""
+        }
+      : null,
+    recipient: recipientSummary
+      ? {
+          id: recipientSummary.userId ? recipientSummary.userId.toString() : recipientSummary._id?.toString() || "",
+          name: recipientSummary.name || `${recipientSummary.firstName || ""} ${recipientSummary.lastName || ""}`.trim() || "User",
+          firstName: recipientSummary.firstName || "",
+          lastName: recipientSummary.lastName || ""
+        }
+      : null
+  };
+}
+

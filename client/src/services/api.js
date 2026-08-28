@@ -90,6 +90,49 @@ export const api = {
       method: "POST",
       body: JSON.stringify({ reason })
     });
+  },
+  // ── Sprint 4 ────────────────────────────────────────────────────────────────
+  changePassword(payload) {
+    return this.request("/api/auth/change-password", {
+      method: "POST",
+      body: JSON.stringify(payload)
+    });
+  },
+  updateRideOffer(id, payload) {
+    return this.request(`/api/ride-offers/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(payload)
+    });
+  },
+  cancelRideOffer(id) {
+    return this.request(`/api/ride-offers/${id}/cancel`, {
+      method: "POST"
+    });
+  },
+  leaveRide(requestId) {
+    return this.request(`/api/join-requests/${requestId}/leave`, {
+      method: "POST"
+    });
+  },
+  sendMessage(payload) {
+    return this.request("/api/messages", {
+      method: "POST",
+      body: JSON.stringify(payload)
+    });
+  },
+  getMessages(rideOfferId, withUserId = "") {
+    const qs = new URLSearchParams({
+      rideOfferId,
+      ...(withUserId ? { withUserId } : {})
+    }).toString();
+    return this.request(`/api/messages?${qs}`);
+  },
+  getConversations() {
+    return this.request("/api/messages/conversations");
+  },
+  getJourneys() {
+    return this.request("/api/journeys");
   }
 };
+
 

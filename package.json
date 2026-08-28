@@ -4,13 +4,15 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "client": "cd client && vite --host 127.0.0.1 --port 5173 --strictPort",
-    "server": "nodemon",
+    "client": "cd client && npx vite --host 127.0.0.1 --port 5173 --strictPort",
+    "server": "npx nodemon",
+
     "start": "node server/index.js",
     "seed": "node server/seed.js",
     "test": "npm --prefix server test",
-    "build": "cd client && vite build",
+    "build": "cd client && npx vite build",
     "dev": "concurrently \"npm run server\" \"npm run client\""
+
   },
   "dependencies": {
     "@vitejs/plugin-react": "^5.0.0",
