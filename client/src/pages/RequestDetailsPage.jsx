@@ -236,9 +236,92 @@ export function RequestDetailsPage(props) {
                 </div>
               )}
 
+              {/* Requester Action Controls */}
+              {isRequester && (
+                <div style={{ marginTop: "1.5rem", paddingTop: "1rem", borderTop: "1px solid #e2e8f0" }}>
+                  <h4 style={{ fontSize: "0.95rem", marginBottom: "0.75rem" }}>Manage Your Join Request</h4>
+                  <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap", alignItems: "center" }}>
+                    <button
+                      type="button"
+                      className="primary-button compact"
+                      style={{ gap: 6 }}
+                      onClick={() => {
+                        sessionStorage.setItem("activeChatOfferId", requestItem.rideOfferId);
+                        sessionStorage.setItem("activeChatPartnerId", requestItem.ownerUserId);
+                        props.setView("messages");
+                      }}
+                    >
+                      Message Offer Owner
+                    </button>
+
+                    {isPending && (
+                      <button
+                        type="button"
+                        className="danger-button compact"
+                        disabled={submitting}
+                        onClick={async () => {
+                          if (!window.confirm("Are you sure you want to cancel this pending join request?")) return;
+                          setSubmitting(true);
+                          setActionError("");
+                          try {
+                            const res = await api.cancelJoinRequest(requestItem.id);
+                            setActionSuccess("Join request cancelled successfully.");
+                            setRequestItem(res.joinRequest);
+                          } catch (err) {
+                            setActionError(err.message || "Failed to cancel request.");
+                          } finally {
+                            setSubmitting(false);
+                          }
+                        }}
+                      >
+                        <Ban size={14} /> Cancel Pending Request
+                      </button>
+                    )}
+
+                    {isAccepted && (
+                      <button
+                        type="button"
+                        className="danger-button compact"
+                        disabled={submitting}
+                        onClick={async () => {
+                          if (!window.confirm("Are you sure you want to leave this joined ride? The seat will be restored to the offer.")) return;
+                          setSubmitting(true);
+                          setActionError("");
+                          try {
+                            const res = await api.leaveRide(requestItem.id);
+                            setActionSuccess("You have left the ride successfully.");
+                            setRequestItem(res.joinRequest);
+                          } catch (err) {
+                            setActionError(err.message || "Failed to leave ride.");
+                          } finally {
+                            setSubmitting(false);
+                          }
+                        }}
+                      >
+                        <Ban size={14} /> Leave Joined Ride
+                      </button>
+                    )}
+                  </div>
+                </div>
+              )}
+
               {/* Owner Action Controls */}
               {isOwner && (
                 <div style={{ marginTop: "1.5rem", paddingTop: "1rem", borderTop: "1px solid #e2e8f0" }}>
+                  <div style={{ display: "flex", gap: "0.75rem", marginBottom: "1rem" }}>
+                    <button
+                      type="button"
+                      className="primary-button compact"
+                      onClick={() => {
+                        sessionStorage.setItem("activeChatOfferId", requestItem.rideOfferId);
+                        sessionStorage.setItem("activeChatPartnerId", requestItem.requesterUserId);
+                        props.setView("messages");
+                      }}
+                    >
+                      Message Passenger
+                    </button>
+                  </div>
+
                   {isPending && (
                     <>
                       <h4 style={{ fontSize: "0.95rem", marginBottom: "0.75rem" }}>Make a Decision</h4>
@@ -291,6 +374,7 @@ export function RequestDetailsPage(props) {
                 </div>
               )}
             </aside>
+
 
             {offer && (
               <aside className="ride-management-panel" style={{ width: "100%" }}>

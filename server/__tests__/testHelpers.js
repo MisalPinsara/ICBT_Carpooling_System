@@ -59,6 +59,24 @@ export class FakeCollection {
     return { matchedCount: 1, modifiedCount: 1 };
   }
 
+  async updateMany(filter, update) {
+    const matchingDocs = this.docs.filter((item) => matchesFilter(item, filter));
+    let modifiedCount = 0;
+    for (const doc of matchingDocs) {
+      if (update.$set) {
+        Object.assign(doc, update.$set);
+        modifiedCount++;
+      }
+      if (update.$inc) {
+        for (const [key, value] of Object.entries(update.$inc)) {
+          doc[key] = (Number(doc[key]) || 0) + Number(value);
+        }
+      }
+    }
+    return { matchedCount: matchingDocs.length, modifiedCount };
+  }
+
+
   async countDocuments(filter = {}) {
     return this.docs.filter((doc) => matchesFilter(doc, filter)).length;
   }
