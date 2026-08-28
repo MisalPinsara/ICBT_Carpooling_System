@@ -44,3 +44,21 @@ jobs:
 
       - name: Run automated Jest tests
         run: npm test
+
+  docker-builds:
+    name: Build ${{ matrix.service }} Docker image
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        service:
+          - client
+          - server
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Build ${{ matrix.service }} image
+        run: docker build --tag icbt-carpooling-${{ matrix.service }}:ci ./${{ matrix.service }}
