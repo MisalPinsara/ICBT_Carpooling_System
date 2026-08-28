@@ -259,7 +259,7 @@ describe("Sprint 1 code-level test cases", () => {
       .set("Authorization", `Bearer ${existingToken}`);
 
     expect(createResponse.status).toBe(201);
-    expect(createResponse.body.offer.driverId).toBe(existingUser._id.toString());
+    expect(createResponse.body.offer.userId).toBe(existingUser._id.toString());
     expect(createResponse.body.offer.status).toBe("Active");
     expect(activeOffersResponse.status).toBe(200);
     expect(activeOffersResponse.body.offers).toHaveLength(1);
