@@ -12,6 +12,8 @@ const routeLabels = {
   rides: "My Ride Offers",
   requests: "Requests",
   find: "Find a Ride",
+  offerDetail: "Find a Ride / Details",
+  myRequests: "My Requests",
   messages: "Messages",
   journeys: "Journeys",
   passengers: "Passengers"
@@ -19,10 +21,14 @@ const routeLabels = {
 
 function isActiveNav(view, key) {
   if (key === "createRide") return ["createRide", "rideDetails", "reviewRide", "rideCreated"].includes(view);
+  if (key === "find") return ["find", "offerDetail"].includes(view);
+  if (key === "requests") return view === "myRequests";
   return view === key;
 }
 
 function handleNavClick(key, setView) {
+  // 'requests' nav item maps to the myRequests view for passengers
+  if (key === "requests") return setView("myRequests");
   setView(key);
 }
 
@@ -30,6 +36,8 @@ function getBackView(view, backViewOverride) {
   if (view === "rideDetails") return backViewOverride || "createRide";
   if (view === "reviewRide" || view === "rideCreated") return "createRide";
   if (view === "editProfile") return "profile";
+  if (view === "offerDetail") return "find";
+  if (view === "myRequests") return "dashboard";
   if (view === "dashboard") return null;
   return "dashboard";
 }

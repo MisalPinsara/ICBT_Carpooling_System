@@ -47,3 +47,32 @@ export function validateRideOffer(payload) {
   }
   return errors;
 }
+
+// Sprint 2 — validates that a join-request body has a non-empty rideOfferId.
+export function validateJoinRequest(payload) {
+  const errors = {};
+  if (!payload.rideOfferId || typeof payload.rideOfferId !== "string" || !payload.rideOfferId.trim()) {
+    errors.rideOfferId = "Ride offer ID is required.";
+  }
+  return errors;
+}
+
+// Sprint 2 — builds a MongoDB filter from search query params.
+// Normalises strings (trim + case-insensitive partial match) per UT-S2-01.
+export function buildSearchQuery(params) {
+  const filter = {};
+  if (params.origin && params.origin.trim()) {
+    filter.origin = { $regex: params.origin.trim(), $options: "i" };
+  }
+  if (params.destination && params.destination.trim()) {
+    filter.destination = { $regex: params.destination.trim(), $options: "i" };
+  }
+  if (params.date && params.date.trim()) {
+    filter.departureDate = { $regex: params.date.trim(), $options: "i" };
+  }
+  if (params.timeWindow && params.timeWindow.trim()) {
+    filter.timeWindow = { $regex: params.timeWindow.trim(), $options: "i" };
+  }
+  return filter;
+}
+

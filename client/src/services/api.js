@@ -49,5 +49,25 @@ export const api = {
   },
   rideDraft() {
     return this.request("/api/ride-offers/draft");
+  },
+  // ── Sprint 2 ────────────────────────────────────────────────────────────────
+  searchRides(params = {}) {
+    const qs = new URLSearchParams(
+      Object.fromEntries(Object.entries(params).filter(([, v]) => v && v.trim()))
+    ).toString();
+    return this.request(`/api/ride-offers/search${qs ? `?${qs}` : ""}`);
+  },
+  publicRideOffer(id) {
+    return this.request(`/api/ride-offers/public/${id}`);
+  },
+  joinRequest(rideOfferId, requestNote = "") {
+    return this.request("/api/join-requests", {
+      method: "POST",
+      body: JSON.stringify({ rideOfferId, requestNote })
+    });
+  },
+  myJoinRequests() {
+    return this.request("/api/join-requests/mine");
   }
 };
+

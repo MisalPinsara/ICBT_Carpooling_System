@@ -1,4 +1,4 @@
-name: Sprint 1 Automated Tests
+name: Automated Tests
 
 on:
   push:
