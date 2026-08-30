@@ -76,3 +76,64 @@ export function buildSearchQuery(params) {
   return filter;
 }
 
+// Sprint 3 — validates decision payload for a join-request.
+export function validateDecision(payload) {
+  const errors = {};
+  const status = (payload?.status || payload?.decision || payload?.action || "").trim();
+  const normalized = status.charAt(0).toUpperCase() + status.slice(1).toLowerCase();
+  if (!["Accepted", "Rejected", "Cancelled"].includes(normalized)) {
+    errors.status = "Decision status must be 'Accepted', 'Rejected', or 'Cancelled'.";
+  }
+  return errors;
+}
+
+// Sprint 4 — validates password change request.
+export function validatePasswordChange(payload = {}) {
+  const currentPassword = payload.currentPassword || payload.oldPassword || payload.current_password || "";
+  const newPassword = payload.newPassword || payload.new_password || payload.password || "";
+  const confirmPassword = payload.confirmPassword || payload.confirmNewPassword || payload.newPasswordConfirm || payload.confirm_password || payload.passwordConfirmation || "";
+
+  const errors = {};
+  if (!currentPassword || typeof currentPassword !== "string" || !currentPassword.trim()) {
+    errors.currentPassword = "Current password is required.";
+  }
+  if (!validatePassword(newPassword)) {
+    errors.newPassword = "New password must be at least 8 characters.";
+  }
+  if (confirmPassword && confirmPassword !== newPassword) {
+    errors.confirmPassword = "New password confirmation does not match.";
+  }
+  return errors;
+}
+
+
+// Sprint 4 — validates ride offer edit.
+export function validateRideOfferEdit(payload = {}) {
+  const errors = {};
+  if (!payload.origin?.trim()) errors.origin = "Origin is required.";
+  if (!payload.destination?.trim()) errors.destination = "Destination is required.";
+  if (!payload.departureDate?.trim()) errors.departureDate = "Departure date is required.";
+  if (!payload.departureTime?.trim()) errors.departureTime = "Departure time is required.";
+  if (!payload.timeWindow?.trim()) errors.timeWindow = "Time window is required.";
+  if (payload.availableSeats === undefined || !Number.isInteger(Number(payload.availableSeats)) || Number(payload.availableSeats) < 0) {
+    errors.availableSeats = "Available seats must be a non-negative integer.";
+  }
+  return errors;
+}
+
+// Sprint 4 — validates message sending.
+export function validateMessage(payload = {}) {
+  const errors = {};
+  if (!payload.content || typeof payload.content !== "string" || !payload.content.trim()) {
+    errors.content = "Message content cannot be empty.";
+  }
+  if (!payload.recipientUserId || typeof payload.recipientUserId !== "string" || !payload.recipientUserId.trim()) {
+    errors.recipientUserId = "Recipient user ID is required.";
+  }
+  if (!payload.rideOfferId || typeof payload.rideOfferId !== "string" || !payload.rideOfferId.trim()) {
+    errors.rideOfferId = "Ride offer ID is required.";
+  }
+  return errors;
+}
+
+

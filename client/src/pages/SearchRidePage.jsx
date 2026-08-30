@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Search, MapPin, CalendarDays, Clock3 } from "lucide-react";
 import { AppShell } from "../components/AppShell";
 import { LoadingWindow } from "../components/LoadingWindow";
@@ -56,6 +56,32 @@ export function SearchRidePage(props) {
   const [results, setResults] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadActiveRides() {
+      setLoading(true);
+      setError("");
+      try {
+        const data = await api.searchRides();
+        if (!cancelled) setResults(data.offers || []);
+      } catch (err) {
+        if (!cancelled) {
+          setError(err.message || "Unable to load rides. Please try again.");
+          setResults([]);
+        }
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    }
+
+    loadActiveRides();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const setField = (field) => (value) => setForm((f) => ({ ...f, [field]: value }));
 

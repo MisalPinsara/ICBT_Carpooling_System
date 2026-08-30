@@ -4,13 +4,15 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "client": "cd client && vite --host 127.0.0.1 --port 5173 --strictPort",
-    "server": "nodemon",
+    "client": "cd client && npx vite --host 127.0.0.1 --port 5173 --strictPort",
+    "server": "npx nodemon",
+
     "start": "node server/index.js",
     "seed": "node server/seed.js",
-    "test": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --runInBand",
-    "build": "cd client && vite build",
+    "test": "npm --prefix server test",
+    "build": "cd client && npx vite build",
     "dev": "concurrently \"npm run server\" \"npm run client\""
+
   },
   "dependencies": {
     "@vitejs/plugin-react": "^5.0.0",
@@ -23,6 +25,7 @@
     "lucide-react": "^0.468.0",
     "mongodb": "^6.8.0",
     "nodemon": "^3.1.4",
+    "pdfkit": "^0.20.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
   },
